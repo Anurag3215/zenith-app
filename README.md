@@ -39,6 +39,9 @@ d:/ZENITH-app/
 │   ├── migrations/         # PostgreSQL schema migrations, RLS policies, and concurrency functions
 │   └── seed.sql            # Seed dataset (10 Groups, 8 Provisioned Accounts, 4-Day Curriculum)
 ├── docs/                   # Formal Architecture & Production Release Documentation
+│   ├── PROJECT_OVERVIEW.md # ★ Executive Overview & Technical Specifications
+│   ├── EVALUATOR_DEMO_SCRIPT.md # ★ 12-Minute Evaluator Demo Script & Speaking Prompts
+│   ├── DEMO_CHECKLIST.md   # ★ Pre-Flight, In-Flight & Post-Flight Operational Checklist
 │   ├── FINAL_HANDOVER.md   # ★ Master Release Handover Dossier & Status Matrix
 │   ├── RUNBOOKS.md         # ★ Operational Runbooks (PITR, Mobile/Web Rollbacks, Key Rotation)
 │   ├── PRODUCT_REQUIREMENTS.md
@@ -61,6 +64,9 @@ Detailed specifications for each layer of the application are maintained in the 
 
 | Document | Purpose |
 | :--- | :--- |
+| [**Project Overview**](docs/PROJECT_OVERVIEW.md) | **Executive project summary, technical stack specifications, and quality benchmarks.** |
+| [**Evaluator Demo Script**](docs/EVALUATOR_DEMO_SCRIPT.md) | **12-minute stage-by-stage presentation script, speaker prompts, and fallback contingencies.** |
+| [**Demo Execution Checklist**](docs/DEMO_CHECKLIST.md) | **Pre-flight, in-flight, and post-flight operational verification checklists.** |
 | [**Final Production Handover**](docs/FINAL_HANDOVER.md) | **Master release dossier, deliverable status matrix, production verification evidence.** |
 | [**Operational Runbooks**](docs/RUNBOOKS.md) | **Disaster recovery runbooks (PITR restore, EAS OTA rollback, Vercel edge rollback, key rotation).** |
 | [Product Requirements (PRD)](docs/PRODUCT_REQUIREMENTS.md) | User personas, functional requirements (FR-01 to FR-15), NFRs, and scope boundaries. |
