@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { GalleryItem } from '@zenith/shared';
-import { COLORS, SPACING, RADII, TYPOGRAPHY, SHADOWS } from '../../theme';
+import { MOBILE_THEME, SPACING, RADII, TYPOGRAPHY, SHADOWS } from '../../theme';
 
 interface GalleryCardProps {
   item: GalleryItem;
@@ -27,8 +28,8 @@ export const GalleryCard: React.FC<GalleryCardProps> = ({
       {/* Media Geometric Placeholder */}
       <View style={styles.mediaPlaceholder}>
         <View style={styles.innerCrest}>
-          <Text style={styles.crestIcon}>📷</Text>
-          <Text style={styles.crestText}>[Milestone Photo Record]</Text>
+          <Ionicons name="camera-outline" size={32} color={MOBILE_THEME.skyBlue} />
+          <Text style={styles.crestText}>Cohort Milestone Capture</Text>
         </View>
 
         {item.day_number ? (
@@ -39,20 +40,21 @@ export const GalleryCard: React.FC<GalleryCardProps> = ({
 
         {item.is_featured_showcase || item.status === 'approved_showcase' ? (
           <View style={styles.featuredBadge}>
-            <Text style={styles.featuredBadgeText}>★ SHOWCASE FEATURED</Text>
+            <Ionicons name="star" size={10} color="#D97706" style={{ marginRight: 3 }} />
+            <Text style={styles.featuredBadgeText}>Featured</Text>
           </View>
         ) : item.status === 'pending_review' ? (
           <View style={[styles.featuredBadge, styles.pendingBadge]}>
-            <Text style={[styles.featuredBadgeText, styles.pendingBadgeText]}>⏳ PENDING REVIEW</Text>
+            <Text style={[styles.featuredBadgeText, styles.pendingBadgeText]}>Pending</Text>
           </View>
         ) : (
           <View style={[styles.featuredBadge, styles.internalBadge]}>
-            <Text style={[styles.featuredBadgeText, styles.internalBadgeText]}>🔒 INTERNAL ONLY</Text>
+            <Text style={[styles.featuredBadgeText, styles.internalBadgeText]}>Internal</Text>
           </View>
         )}
       </View>
 
-      {/* Meta */}
+      {/* Content */}
       <View style={styles.content}>
         <Text style={styles.caption} numberOfLines={2}>
           {item.caption}
@@ -75,7 +77,7 @@ export const GalleryCard: React.FC<GalleryCardProps> = ({
               accessibilityRole="button"
             >
               <Text style={styles.curateText}>
-                {item.is_featured_showcase ? 'UNFEATURE' : 'FEATURE ★'}
+                {item.is_featured_showcase ? 'Unfeature' : 'Feature ★'}
               </Text>
             </TouchableOpacity>
           ) : null}
@@ -87,114 +89,94 @@ export const GalleryCard: React.FC<GalleryCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.surfaceCard,
+    backgroundColor: MOBILE_THEME.surfaceWhite,
     borderRadius: RADII.xl,
     overflow: 'hidden',
     marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
+    borderColor: MOBILE_THEME.borderLight,
     ...SHADOWS.card,
   },
   mediaPlaceholder: {
-    height: 150,
-    backgroundColor: COLORS.surfaceElevated,
+    height: 160,
+    backgroundColor: MOBILE_THEME.bgSoftBlue,
     alignItems: 'center',
     justifyContent: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderSubtle,
     position: 'relative',
+    borderBottomWidth: 1,
+    borderBottomColor: MOBILE_THEME.borderLight,
   },
   innerCrest: {
     alignItems: 'center',
   },
-  crestIcon: {
-    fontSize: 28,
-    marginBottom: SPACING.xs,
-  },
   crestText: {
-    color: COLORS.textMuted,
+    color: MOBILE_THEME.textSecondary,
     fontSize: 11,
-    fontStyle: 'italic',
+    fontWeight: '600',
+    marginTop: 6,
   },
   featuredBadge: {
     position: 'absolute',
-    top: SPACING.sm,
-    right: SPACING.sm,
-    backgroundColor: COLORS.accentGoldSoft,
+    top: 10,
+    right: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF3C7',
     borderWidth: 1,
-    borderColor: COLORS.accentGold,
+    borderColor: '#FCD34D',
     borderRadius: RADII.full,
-    paddingHorizontal: SPACING.sm,
+    paddingHorizontal: 8,
     paddingVertical: 3,
   },
   featuredBadgeText: {
-    color: COLORS.accentGoldBright,
-    fontSize: 9,
+    color: '#92400E',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  pendingBadge: {
+    backgroundColor: '#F1F5F9',
+    borderColor: '#CBD5E1',
+  },
+  pendingBadgeText: {
+    color: '#64748B',
+  },
+  internalBadge: {
+    backgroundColor: '#F1F5F9',
+    borderColor: '#CBD5E1',
+  },
+  internalBadgeText: {
+    color: '#64748B',
+  },
+  dayBadge: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    backgroundColor: MOBILE_THEME.surfaceWhite,
+    borderWidth: 1,
+    borderColor: MOBILE_THEME.skyBlue,
+    borderRadius: RADII.sm,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  dayBadgeText: {
+    color: MOBILE_THEME.skyBlue,
+    fontSize: 10,
     fontWeight: '800',
-    letterSpacing: 0.5,
   },
   content: {
     padding: SPACING.md,
   },
   caption: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.sm,
+    color: MOBILE_THEME.navyHeader,
+    fontSize: 13,
     fontWeight: '700',
     lineHeight: 18,
     marginBottom: 4,
   },
   uploaderText: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.sizes.xs,
+    color: MOBILE_THEME.textSecondary,
+    fontSize: 11,
     marginBottom: SPACING.sm,
-  },
-  tagsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  tagChip: {
-    backgroundColor: COLORS.surfaceElevated,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: 2,
-    borderRadius: RADII.full,
-    marginRight: SPACING.xs,
-    borderWidth: 1,
-    borderColor: 'rgba(30, 51, 104, 0.4)',
-  },
-  tagText: {
-    color: COLORS.brandCyanLight,
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  dayBadge: {
-    position: 'absolute',
-    top: SPACING.sm,
-    left: SPACING.sm,
-    backgroundColor: COLORS.surfaceCard,
-    borderWidth: 1,
-    borderColor: COLORS.brandCyan,
-    borderRadius: RADII.sm,
-    paddingHorizontal: SPACING.xs + 2,
-    paddingVertical: 2,
-  },
-  dayBadgeText: {
-    color: COLORS.brandCyanLight,
-    fontSize: 9,
-    fontWeight: '800',
-  },
-  pendingBadge: {
-    backgroundColor: 'rgba(234, 179, 8, 0.15)',
-    borderColor: 'rgba(234, 179, 8, 0.4)',
-  },
-  pendingBadgeText: {
-    color: COLORS.accentGoldBright,
-  },
-  internalBadge: {
-    backgroundColor: 'rgba(148, 163, 184, 0.15)',
-    borderColor: 'rgba(148, 163, 184, 0.4)',
-  },
-  internalBadgeText: {
-    color: '#94A3B8',
   },
   bottomRow: {
     flexDirection: 'row',
@@ -202,18 +184,36 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: SPACING.xs,
   },
-  curateBtn: {
-    backgroundColor: COLORS.surfaceElevated,
+  tagsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    flex: 1,
+  },
+  tagChip: {
+    backgroundColor: MOBILE_THEME.bgLight,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: RADII.full,
+    marginRight: 6,
     borderWidth: 1,
-    borderColor: COLORS.accentGold,
+    borderColor: MOBILE_THEME.borderLight,
+  },
+  tagText: {
+    color: MOBILE_THEME.textSecondary,
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  curateBtn: {
+    backgroundColor: MOBILE_THEME.bgSoftBlue,
+    borderWidth: 1,
+    borderColor: MOBILE_THEME.skyBlue,
     borderRadius: RADII.md,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
   curateText: {
-    color: COLORS.accentGoldBright,
-    fontSize: 9,
+    color: MOBILE_THEME.skyBlue,
+    fontSize: 10,
     fontWeight: '800',
-    letterSpacing: 0.5,
   },
 });

@@ -9,11 +9,11 @@ import {
   Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, SPACING, RADII, TYPOGRAPHY } from '../../src/theme';
+import { MOBILE_THEME, SPACING, RADII } from '../../src/theme';
 import { useAuth } from '../../src/context/AuthContext';
-import { Button } from '../../src/components/common/Button';
 import { InputField } from '../../src/components/common/InputField';
-import { DemoBanner } from '../../src/components/common/DemoBanner';
+import { ZenithLogo } from '../../src/components/common/ZenithLogo';
+import { MountainSummitView } from '../../src/components/common/MountainSummitView';
 import { AppRole } from '@zenith/shared';
 
 export default function LoginScreen() {
@@ -23,6 +23,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('captain@zenith5.edu');
   const [password, setPassword] = useState('zenith2026');
   const [loading, setLoading] = useState(false);
+  const [showRoleSwitcher, setShowRoleSwitcher] = useState(false);
 
   const handleSignIn = async () => {
     setLoading(true);
@@ -41,37 +42,29 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.keyboardContainer}
     >
-      <DemoBanner />
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingTop: Math.max(insets.top, 24), paddingBottom: Math.max(insets.bottom, 24) },
+          { paddingTop: Math.max(insets.top, 24), paddingBottom: Math.max(insets.bottom, 16) },
         ]}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        {/* Crest & Title */}
+        {/* Official ZENITH Brand Crest */}
         <View style={styles.brandContainer}>
-          <View style={styles.crest}>
-            <Text style={styles.crestZ}>ZENITH</Text>
-            <Text style={styles.crestTeam}>TEAM 05</Text>
-          </View>
-          <Text style={styles.appName}>ZENITH</Text>
-          <Text style={styles.appSub}>mPOWER Placement Training Program</Text>
-          <View style={styles.badgeClosed}>
-            <Text style={styles.badgeClosedText}>CLOSED MEMBER WORKSPACE</Text>
-          </View>
+          <ZenithLogo size={72} textColor={MOBILE_THEME.navyHeader} showSubtitle={false} />
         </View>
 
-        {/* Form Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>MEMBER AUTHENTICATION</Text>
-          <Text style={styles.cardSubtitle}>
-            Enter your authorized institutional credentials to access Team 5 internal operations.
-          </Text>
+        {/* Heading & Subtitle */}
+        <View style={styles.headingBox}>
+          <Text style={styles.title}>Welcome Back</Text>
+          <Text style={styles.subtitle}>Sign in to access your team workspace</Text>
+        </View>
 
+        {/* Form Fields */}
+        <View style={styles.formCard}>
           <InputField
-            label="INSTITUTIONAL EMAIL"
-            placeholder="member@zenith5.edu"
+            placeholder="Email / Username"
             value={email}
             onChangeText={(txt) => {
               setEmail(txt);
@@ -79,84 +72,94 @@ export default function LoginScreen() {
             }}
             keyboardType="email-address"
             autoCapitalize="none"
+            leftIcon="mail-outline"
+            variant="light"
           />
 
           <InputField
-            label="MEMBER SECURITY KEY / PASSWORD"
-            placeholder="••••••••"
+            placeholder="Password"
             value={password}
             onChangeText={(txt) => {
               setPassword(txt);
               if (error) clearError();
             }}
             isPassword
+            leftIcon="lock-closed-outline"
+            variant="light"
           />
 
           {error ? (
             <View style={styles.errorBox}>
-              <Text style={styles.errorIcon}>⚠</Text>
-              <Text style={styles.errorText}>{error}</Text>
+              <Text style={styles.errorText}>⚠ {error}</Text>
             </View>
           ) : null}
 
-          <Button
-            title="AUTHENTICATE & ENTER"
+          <TouchableOpacity
+            style={[styles.signInBtn, loading && styles.btnDisabled]}
             onPress={handleSignIn}
-            loading={loading}
-            variant="primary"
-            size="lg"
-            style={styles.submitBtn}
-          />
+            disabled={loading}
+            accessibilityRole="button"
+            accessibilityLabel="Sign In"
+          >
+            <Text style={styles.signInBtnText}>{loading ? 'Signing in...' : 'Sign In'}</Text>
+          </TouchableOpacity>
 
-          <Text style={styles.securityNotice}>
-            🔒 Protected by PostgreSQL Row Level Security. Public registration is disabled.
-          </Text>
+          <TouchableOpacity
+            style={styles.forgotBtn}
+            onPress={() => alert('Please contact Team Admin or use Evaluator Quick Switcher to sign in.')}
+          >
+            <Text style={styles.forgotText}>Forgot Password?</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Evaluator Quick Role Selection Box */}
-        <View style={styles.evaluatorBox}>
-          <Text style={styles.evaluatorTitle}>EVALUATOR DEMONSTRATION SWITCHER</Text>
-          <Text style={styles.evaluatorSubtitle}>
-            Quickly test role-based permissions across Team 5's four operational tiers:
-          </Text>
+        {/* Evaluator Quick Role Switcher (Collapsible for Demo Testing) */}
+        <View style={styles.evaluatorContainer}>
+          <TouchableOpacity
+            style={styles.evaluatorToggle}
+            onPress={() => setShowRoleSwitcher(!showRoleSwitcher)}
+          >
+            <Text style={styles.evaluatorToggleText}>
+              {showRoleSwitcher ? '▾ Hide Evaluator Demo Switcher' : '▸ Evaluator Role Switcher (1-Tap Demo)'}
+            </Text>
+          </TouchableOpacity>
 
-          <View style={styles.rolesGrid}>
-            <TouchableOpacity
-              style={[styles.roleBtn, styles.roleBtnGold]}
-              onPress={() => handleQuickRole('captain')}
-              disabled={loading}
-            >
-              <Text style={styles.roleBtnTitle}>CAPTAIN</Text>
-              <Text style={styles.roleBtnDesc}>Score editing & lead permissions</Text>
-            </TouchableOpacity>
+          {showRoleSwitcher ? (
+            <View style={styles.rolesRow}>
+              <TouchableOpacity
+                style={[styles.roleChip, styles.chipGold]}
+                onPress={() => handleQuickRole('captain')}
+              >
+                <Text style={styles.chipTextGold}>Captain</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.roleChip, styles.chipBlue]}
+                onPress={() => handleQuickRole('vice_captain')}
+              >
+                <Text style={styles.chipTextBlue}>Vice-Capt</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.roleChip, styles.chipSlate]}
+                onPress={() => handleQuickRole('team_admin')}
+              >
+                <Text style={styles.chipTextSlate}>Admin</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.roleChip, styles.chipSlate]}
+                onPress={() => handleQuickRole('member')}
+              >
+                <Text style={styles.chipTextSlate}>Member</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+        </View>
 
-            <TouchableOpacity
-              style={[styles.roleBtn, styles.roleBtnCyan]}
-              onPress={() => handleQuickRole('vice_captain')}
-              disabled={loading}
-            >
-              <Text style={styles.roleBtnTitle}>VICE-CAPTAIN</Text>
-              <Text style={styles.roleBtnDesc}>Score editing & team co-lead</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.roleBtn, styles.roleBtnElectric]}
-              onPress={() => handleQuickRole('team_admin')}
-              disabled={loading}
-            >
-              <Text style={styles.roleBtnTitle}>TEAM ADMIN</Text>
-              <Text style={styles.roleBtnDesc}>Governance, audit & controls</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.roleBtn, styles.roleBtnSlate]}
-              onPress={() => handleQuickRole('member')}
-              disabled={loading}
-            >
-              <Text style={styles.roleBtnTitle}>ORDINARY MEMBER</Text>
-              <Text style={styles.roleBtnDesc}>Read-only scores & reflections</Text>
-            </TouchableOpacity>
-          </View>
+        {/* Bottom Mountain Summit View & Placement Program Footer */}
+        <View style={styles.mountainBox}>
+          <MountainSummitView
+            variant="light"
+            height={130}
+            tagline="mPOWER Placement Training Program"
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -166,175 +169,134 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   keyboardContainer: {
     flex: 1,
-    backgroundColor: COLORS.backgroundDeep,
+    backgroundColor: '#FFFFFF',
   },
   scrollContent: {
-    paddingHorizontal: SPACING.lg,
-    alignItems: 'center',
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    justifyContent: 'space-between',
   },
   brandContainer: {
     alignItems: 'center',
-    marginVertical: SPACING.xl,
+    marginTop: 12,
   },
-  crest: {
-    width: 76,
-    height: 76,
-    borderRadius: RADII.xl,
-    backgroundColor: COLORS.surfaceCard,
-    borderWidth: 2,
-    borderColor: COLORS.brandCyan,
+  headingBox: {
+    alignItems: 'center',
+    marginVertical: 14,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: MOBILE_THEME.navyHeader,
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    fontSize: 13,
+    color: MOBILE_THEME.textSecondary,
+    marginTop: 4,
+  },
+  formCard: {
+    width: '100%',
+    marginVertical: 10,
+  },
+  signInBtn: {
+    backgroundColor: MOBILE_THEME.navyButton,
+    borderRadius: 14,
+    paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: SPACING.md,
+    marginTop: 8,
+    shadowColor: MOBILE_THEME.navyButton,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  crestZ: {
-    color: COLORS.brandCyanLight,
-    fontWeight: '800',
-    fontSize: 14,
-    letterSpacing: 1,
+  btnDisabled: {
+    opacity: 0.6,
   },
-  crestTeam: {
-    color: COLORS.accentGoldBright,
-    fontWeight: '800',
-    fontSize: 10,
-    letterSpacing: 0.8,
+  signInBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.4,
   },
-  appName: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.xxl,
-    fontWeight: '800',
-    letterSpacing: 1.5,
+  forgotBtn: {
+    alignItems: 'center',
+    marginTop: 14,
+    paddingVertical: 4,
   },
-  appSub: {
-    color: COLORS.brandCyanLight,
-    fontSize: TYPOGRAPHY.sizes.xs,
+  forgotText: {
+    fontSize: 12,
+    color: MOBILE_THEME.textSecondary,
     fontWeight: '600',
-    letterSpacing: 0.5,
-    marginTop: 2,
-  },
-  badgeClosed: {
-    backgroundColor: 'rgba(37, 99, 235, 0.15)',
-    borderWidth: 1,
-    borderColor: COLORS.brandElectric,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: 3,
-    borderRadius: RADII.full,
-    marginTop: SPACING.sm,
-  },
-  badgeClosedText: {
-    color: COLORS.brandElectricGlow,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  card: {
-    width: '100%',
-    backgroundColor: COLORS.surfaceCard,
-    borderRadius: RADII.xl,
-    padding: SPACING.xl,
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-    marginBottom: SPACING.xl,
-  },
-  cardTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.md,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-    marginBottom: SPACING.xs,
-  },
-  cardSubtitle: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.sizes.xs,
-    lineHeight: 18,
-    marginBottom: SPACING.lg,
-  },
-  submitBtn: {
-    marginTop: SPACING.sm,
   },
   errorBox: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
     borderWidth: 1,
-    borderColor: COLORS.danger,
-    borderRadius: RADII.md,
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
-  },
-  errorIcon: {
-    color: COLORS.danger,
-    marginRight: SPACING.sm,
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 12,
   },
   errorText: {
-    color: '#FCA5A5',
-    fontSize: TYPOGRAPHY.sizes.xs,
-    flex: 1,
-    lineHeight: 16,
-  },
-  securityNotice: {
-    color: COLORS.textMuted,
-    fontSize: 10,
-    textAlign: 'center',
-    marginTop: SPACING.md,
-    lineHeight: 14,
-  },
-  evaluatorBox: {
-    width: '100%',
-    backgroundColor: 'rgba(16, 28, 61, 0.6)',
-    borderRadius: RADII.xl,
-    padding: SPACING.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(30, 51, 104, 0.6)',
-    marginBottom: SPACING.xl,
-  },
-  evaluatorTitle: {
-    color: COLORS.accentGoldBright,
-    fontSize: TYPOGRAPHY.sizes.xs,
-    fontWeight: '800',
-    letterSpacing: 0.8,
+    color: MOBILE_THEME.danger,
+    fontSize: 12,
+    fontWeight: '600',
     textAlign: 'center',
   },
-  evaluatorSubtitle: {
-    color: COLORS.textMuted,
+  evaluatorContainer: {
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  evaluatorToggle: {
+    paddingVertical: 6,
+  },
+  evaluatorToggleText: {
     fontSize: 11,
-    textAlign: 'center',
-    marginTop: 4,
-    marginBottom: SPACING.md,
+    color: '#0284C7',
+    fontWeight: '700',
   },
-  rolesGrid: {
+  rolesRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    gap: 8,
+    marginTop: 8,
   },
-  roleBtn: {
-    width: '48%',
-    backgroundColor: COLORS.surfaceElevated,
-    borderRadius: RADII.lg,
-    padding: SPACING.md,
+  roleChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
     borderWidth: 1,
-    marginBottom: SPACING.sm,
   },
-  roleBtnGold: {
-    borderColor: COLORS.accentGold,
+  chipGold: {
+    backgroundColor: '#FEF3C7',
+    borderColor: '#F59E0B',
   },
-  roleBtnCyan: {
-    borderColor: COLORS.brandCyan,
-  },
-  roleBtnElectric: {
-    borderColor: COLORS.brandElectric,
-  },
-  roleBtnSlate: {
-    borderColor: COLORS.borderSubtle,
-  },
-  roleBtnTitle: {
-    color: COLORS.textPrimary,
+  chipTextGold: {
+    color: '#B45309',
     fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+    fontWeight: '700',
   },
-  roleBtnDesc: {
-    color: COLORS.textMuted,
-    fontSize: 9,
-    marginTop: 2,
+  chipBlue: {
+    backgroundColor: '#E0F2FE',
+    borderColor: '#0284C7',
+  },
+  chipTextBlue: {
+    color: '#0369A1',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  chipSlate: {
+    backgroundColor: '#F1F5F9',
+    borderColor: '#CBD5E1',
+  },
+  chipTextSlate: {
+    color: '#475569',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  mountainBox: {
+    width: '100%',
+    marginTop: 16,
   },
 });

@@ -8,14 +8,17 @@ import {
   TextInputProps,
   ViewStyle,
 } from 'react-native';
-import { COLORS, SPACING, RADII, TYPOGRAPHY } from '../../theme';
+import { Ionicons } from '@expo/vector-icons';
+import { MOBILE_THEME, SPACING, RADII, TYPOGRAPHY } from '../../theme';
 
 interface InputFieldProps extends TextInputProps {
-  label: string;
+  label?: string;
   error?: string | null;
   helperText?: string;
   containerStyle?: ViewStyle;
   isPassword?: boolean;
+  leftIcon?: keyof typeof Ionicons.glyphMap;
+  variant?: 'light' | 'dark';
 }
 
 export const InputField: React.FC<InputFieldProps> = ({
@@ -24,30 +27,49 @@ export const InputField: React.FC<InputFieldProps> = ({
   helperText,
   containerStyle,
   isPassword = false,
+  leftIcon,
+  variant = 'light',
   ...rest
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(!isPassword);
 
+  const isLight = variant === 'light';
+
   return (
     <View style={[styles.container, containerStyle]}>
-      <Text style={styles.label}>{label}</Text>
+      {label ? (
+        <Text style={[styles.label, { color: isLight ? MOBILE_THEME.textSecondary : '#A5A6C4' }]}>
+          {label}
+        </Text>
+      ) : null}
       <View
         style={[
           styles.inputContainer,
-          isFocused && styles.focused,
+          isLight ? styles.inputLight : styles.inputDark,
+          isFocused && (isLight ? styles.focusedLight : styles.focusedDark),
           Boolean(error) && styles.errorBorder,
         ]}
       >
+        {leftIcon ? (
+          <Ionicons
+            name={leftIcon}
+            size={18}
+            color={isLight ? '#94A3B8' : '#71719A'}
+            style={styles.leftIcon}
+          />
+        ) : null}
+
         <TextInput
-          style={styles.input}
-          placeholderTextColor={COLORS.textMuted}
+          style={[styles.input, { color: isLight ? MOBILE_THEME.textDark : '#FFFFFF' }]}
+          placeholderTextColor={isLight ? '#94A3B8' : '#71719A'}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           secureTextEntry={isPassword && !showPassword}
-          accessibilityLabel={label}
+          accessibilityLabel={label || rest.placeholder}
           {...rest}
         />
+
         {isPassword ? (
           <TouchableOpacity
             style={styles.toggleBtn}
@@ -55,7 +77,11 @@ export const InputField: React.FC<InputFieldProps> = ({
             accessibilityRole="button"
             accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
           >
-            <Text style={styles.toggleText}>{showPassword ? 'HIDE' : 'SHOW'}</Text>
+            <Ionicons
+              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+              size={18}
+              color={isLight ? '#64748B' : '#A5A6C4'}
+            />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -72,56 +98,65 @@ export const InputField: React.FC<InputFieldProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.md,
   },
   label: {
-    fontSize: TYPOGRAPHY.sizes.sm,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.xs + 2,
+    fontSize: 12,
+    fontWeight: '700',
+    marginBottom: 6,
     letterSpacing: 0.3,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.surfaceCard,
     borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-    borderRadius: RADII.lg,
+    borderRadius: 14,
     paddingHorizontal: SPACING.md,
-    minHeight: 48, // WCAG touch target
+    minHeight: 50,
+  },
+  inputLight: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E2E8F0',
+  },
+  inputDark: {
+    backgroundColor: 'rgba(20, 11, 46, 0.7)',
+    borderColor: 'rgba(168, 85, 247, 0.25)',
+  },
+  leftIcon: {
+    marginRight: 10,
   },
   input: {
     flex: 1,
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.md,
-    paddingVertical: SPACING.sm + 2,
+    fontSize: 14,
+    paddingVertical: 12,
   },
-  focused: {
-    borderColor: COLORS.brandElectricGlow,
-    backgroundColor: COLORS.surfaceCardHover,
+  focusedLight: {
+    borderColor: '#0284C7',
+    shadowColor: '#0284C7',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  focusedDark: {
+    borderColor: '#A855F7',
+    backgroundColor: 'rgba(28, 16, 60, 0.85)',
   },
   errorBorder: {
-    borderColor: COLORS.danger,
+    borderColor: MOBILE_THEME.danger,
   },
   toggleBtn: {
-    paddingVertical: SPACING.xs,
-    paddingHorizontal: SPACING.sm,
-  },
-  toggleText: {
-    color: COLORS.brandCyanLight,
-    fontSize: TYPOGRAPHY.sizes.xs,
-    fontWeight: '700',
+    padding: SPACING.xs,
   },
   errorText: {
-    color: COLORS.danger,
-    fontSize: TYPOGRAPHY.sizes.xs,
-    marginTop: SPACING.xs,
-    fontWeight: '500',
+    color: MOBILE_THEME.danger,
+    fontSize: 11,
+    marginTop: 4,
+    fontWeight: '600',
   },
   helperText: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.sizes.xs,
-    marginTop: SPACING.xs,
+    color: '#94A3B8',
+    fontSize: 11,
+    marginTop: 4,
   },
 });

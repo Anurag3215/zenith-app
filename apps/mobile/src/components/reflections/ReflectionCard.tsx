@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Reflection } from '@zenith/shared';
-import { COLORS, SPACING, RADII, TYPOGRAPHY, SHADOWS } from '../../theme';
-import { Badge } from '../common/Badge';
+import { MOBILE_THEME, SPACING, RADII, TYPOGRAPHY, SHADOWS } from '../../theme';
 
 interface ReflectionCardProps {
   reflection: Reflection;
@@ -20,7 +20,15 @@ export const ReflectionCard: React.FC<ReflectionCardProps> = ({
   onToggleApproval,
 }) => {
   const renderStars = (rating: number) => {
-    return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+    return Array.from({ length: 5 }, (_, i) => (
+      <Ionicons
+        key={i}
+        name={i < rating ? 'star' : 'star-outline'}
+        size={14}
+        color={i < rating ? MOBILE_THEME.brandGoldBright : '#CBD5E1'}
+        style={{ marginRight: 1 }}
+      />
+    ));
   };
 
   return (
@@ -32,40 +40,31 @@ export const ReflectionCard: React.FC<ReflectionCardProps> = ({
             <Text style={styles.authorName}>{reflection.member_name}</Text>
             {reflection.is_draft ? (
               <View style={styles.draftBadge}>
-                <Text style={styles.draftBadgeText}>LOCAL DRAFT</Text>
+                <Text style={styles.draftBadgeText}>Draft</Text>
               </View>
             ) : null}
           </View>
           <View style={styles.subMeta}>
-            <Badge
-              label={`DAY 0${reflection.day_number}`}
-              variant="custom"
-              bg={COLORS.surfaceElevated}
-              color={COLORS.brandCyanLight}
-            />
-            <View style={{ marginLeft: SPACING.xs }}>
-              <Badge
-                label={reflection.member_role.replace('_', ' ')}
-                variant="role"
-                role={reflection.member_role}
-              />
+            <View style={styles.dayPill}>
+              <Text style={styles.dayPillText}>Day 0{reflection.day_number}</Text>
+            </View>
+            <View style={styles.rolePill}>
+              <Text style={styles.rolePillText}>
+                {reflection.member_role.replace('_', ' ')}
+              </Text>
             </View>
             {reflection.visibility === 'private' ? (
-              <View style={{ marginLeft: SPACING.xs }}>
-                <Badge
-                  label="PRIVATE LOG"
-                  variant="custom"
-                  bg="rgba(148, 163, 184, 0.15)"
-                  color="#94A3B8"
-                />
+              <View style={styles.privatePill}>
+                <Ionicons name="lock-closed" size={10} color="#64748B" style={{ marginRight: 2 }} />
+                <Text style={styles.privatePillText}>Private</Text>
               </View>
             ) : null}
           </View>
         </View>
 
         <View style={styles.ratingBlock}>
-          <Text style={styles.starsText}>{renderStars(reflection.mood_rating)}</Text>
-          <Text style={styles.ratingSubtext}>{reflection.mood_rating}/5 Mastery</Text>
+          <View style={styles.starsRow}>{renderStars(reflection.mood_rating)}</View>
+          <Text style={styles.ratingSubtext}>{reflection.mood_rating}/5 Confidence</Text>
         </View>
       </View>
 
@@ -77,14 +76,14 @@ export const ReflectionCard: React.FC<ReflectionCardProps> = ({
 
       {reflection.challenges_faced ? (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>CHALLENGES ENCOUNTERED</Text>
+          <Text style={styles.sectionTitle}>CHALLENGES</Text>
           <Text style={styles.bodyText}>{reflection.challenges_faced}</Text>
         </View>
       ) : null}
 
       {reflection.action_items ? (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>CORRECTIVE ACTION ITEMS</Text>
+          <Text style={styles.sectionTitle}>ACTION ITEMS</Text>
           <Text style={styles.bodyText}>{reflection.action_items}</Text>
         </View>
       ) : null}
@@ -100,10 +99,10 @@ export const ReflectionCard: React.FC<ReflectionCardProps> = ({
           />
           <Text style={styles.showcaseText}>
             {reflection.is_approved_for_showcase
-              ? 'Featured on Evaluator Web Showcase'
+              ? 'Featured on Evaluator Showcase ★'
               : reflection.visibility === 'private'
               ? 'Private Author Log'
-              : 'Internal Workspace Only'}
+              : 'Shared with Team 5'}
           </Text>
         </View>
 
@@ -115,19 +114,28 @@ export const ReflectionCard: React.FC<ReflectionCardProps> = ({
               accessibilityRole="button"
               accessibilityLabel="Edit your reflection"
             >
-              <Text style={styles.editText}>EDIT ✎</Text>
+              <Ionicons name="pencil" size={12} color={MOBILE_THEME.navyHeader} style={{ marginRight: 3 }} />
+              <Text style={styles.editText}>Edit</Text>
             </TouchableOpacity>
           ) : null}
 
           {canApprove && !reflection.is_draft && reflection.visibility !== 'private' ? (
             <TouchableOpacity
-              style={styles.toggleBtn}
+              style={[
+                styles.toggleBtn,
+                reflection.is_approved_for_showcase && styles.toggleBtnActive,
+              ]}
               onPress={onToggleApproval}
               accessibilityRole="button"
               accessibilityLabel="Toggle showcase approval status"
             >
-              <Text style={styles.toggleText}>
-                {reflection.is_approved_for_showcase ? 'UNPUBLISH' : 'APPROVE FOR SHOWCASE ★'}
+              <Text
+                style={[
+                  styles.toggleText,
+                  reflection.is_approved_for_showcase && styles.toggleTextActive,
+                ]}
+              >
+                {reflection.is_approved_for_showcase ? 'Unpublish' : 'Feature ★'}
               </Text>
             </TouchableOpacity>
           ) : null}
@@ -139,72 +147,126 @@ export const ReflectionCard: React.FC<ReflectionCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.surfaceCard,
+    backgroundColor: MOBILE_THEME.surfaceWhite,
     borderRadius: RADII.xl,
-    padding: SPACING.lg,
+    padding: SPACING.md + 2,
     marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
+    borderColor: MOBILE_THEME.borderLight,
     ...SHADOWS.card,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm + 2,
     paddingBottom: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(30, 51, 104, 0.4)',
+    borderBottomColor: MOBILE_THEME.borderLight,
   },
   authorBlock: {
     flex: 1,
   },
+  authorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   authorName: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.md,
+    color: MOBILE_THEME.navyHeader,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  draftBadge: {
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FCD34D',
+    borderRadius: RADII.full,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    marginLeft: 6,
+  },
+  draftBadgeText: {
+    color: '#92400E',
+    fontSize: 9,
     fontWeight: '700',
-    marginBottom: SPACING.xs,
   },
   subMeta: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  dayPill: {
+    backgroundColor: MOBILE_THEME.bgSoftBlue,
+    borderRadius: RADII.sm,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginRight: 6,
+  },
+  dayPillText: {
+    color: MOBILE_THEME.skyBlue,
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  rolePill: {
+    backgroundColor: MOBILE_THEME.bgLight,
+    borderRadius: RADII.sm,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginRight: 6,
+  },
+  rolePillText: {
+    color: MOBILE_THEME.textSecondary,
+    fontSize: 10,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
+  privatePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    borderRadius: RADII.sm,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  privatePillText: {
+    color: '#64748B',
+    fontSize: 10,
+    fontWeight: '600',
+  },
   ratingBlock: {
     alignItems: 'flex-end',
   },
-  starsText: {
-    color: COLORS.accentGoldBright,
-    fontSize: 16,
-    letterSpacing: 2,
+  starsRow: {
+    flexDirection: 'row',
   },
   ratingSubtext: {
-    color: COLORS.textMuted,
+    color: MOBILE_THEME.textMuted,
     fontSize: 10,
     marginTop: 2,
   },
   section: {
-    marginBottom: SPACING.sm + 2,
+    marginBottom: SPACING.sm,
   },
   sectionTitle: {
-    color: COLORS.brandCyanLight,
-    fontSize: 10,
+    color: MOBILE_THEME.textMuted,
+    fontSize: 9,
     fontWeight: '800',
     letterSpacing: 0.8,
-    marginBottom: 3,
+    marginBottom: 2,
   },
   bodyText: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.sizes.sm,
-    lineHeight: 20,
+    color: MOBILE_THEME.navyHeader,
+    fontSize: 13,
+    lineHeight: 18,
   },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: SPACING.sm,
+    marginTop: SPACING.xs,
     paddingTop: SPACING.sm,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(30, 51, 104, 0.4)',
+    borderTopColor: MOBILE_THEME.borderLight,
   },
   showcaseStatus: {
     flexDirection: 'row',
@@ -212,71 +274,60 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   showcaseDot: {
-    width: 8,
-    height: 8,
+    width: 7,
+    height: 7,
     borderRadius: 4,
-    marginRight: SPACING.xs + 2,
+    marginRight: 6,
   },
   dotApproved: {
-    backgroundColor: COLORS.accentGold,
+    backgroundColor: MOBILE_THEME.brandGoldBright,
   },
   dotInternal: {
-    backgroundColor: COLORS.textMuted,
+    backgroundColor: '#94A3B8',
   },
   showcaseText: {
-    color: COLORS.textMuted,
-    fontSize: 11,
-    fontWeight: '500',
-  },
-  toggleBtn: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: RADII.md,
-    backgroundColor: COLORS.surfaceElevated,
-    borderWidth: 1,
-    borderColor: COLORS.brandCyan,
-  },
-  toggleText: {
-    color: COLORS.brandCyanLight,
+    color: MOBILE_THEME.textSecondary,
     fontSize: 10,
-    fontWeight: '700',
-  },
-  authorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING.xs,
-  },
-  draftBadge: {
-    backgroundColor: 'rgba(234, 179, 8, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(234, 179, 8, 0.4)',
-    borderRadius: RADII.sm,
-    paddingHorizontal: SPACING.xs + 2,
-    paddingVertical: 1,
-    marginLeft: SPACING.xs + 2,
-  },
-  draftBadgeText: {
-    color: COLORS.accentGoldBright,
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+    fontWeight: '500',
   },
   controlsRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   editBtn: {
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: RADII.md,
-    backgroundColor: COLORS.surfaceElevated,
+    backgroundColor: MOBILE_THEME.bgLight,
     borderWidth: 1,
-    borderColor: COLORS.brandElectric,
-    marginRight: SPACING.xs,
+    borderColor: MOBILE_THEME.borderLight,
+    marginRight: 6,
   },
   editText: {
-    color: COLORS.brandCyanLight,
+    color: MOBILE_THEME.navyHeader,
     fontSize: 10,
     fontWeight: '700',
+  },
+  toggleBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: RADII.md,
+    backgroundColor: MOBILE_THEME.bgSoftBlue,
+    borderWidth: 1,
+    borderColor: MOBILE_THEME.skyBlue,
+  },
+  toggleBtnActive: {
+    backgroundColor: '#FEF3C7',
+    borderColor: '#FCD34D',
+  },
+  toggleText: {
+    color: MOBILE_THEME.skyBlue,
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  toggleTextActive: {
+    color: '#92400E',
   },
 });

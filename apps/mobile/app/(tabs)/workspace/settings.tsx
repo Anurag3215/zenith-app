@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+  Alert,
+} from 'react-native';
 import { useRouter } from 'expo-router';
-import { Header } from '../../../src/components/common/Header';
-import { DemoBanner } from '../../../src/components/common/DemoBanner';
-import { Badge } from '../../../src/components/common/Badge';
-import { Card } from '../../../src/components/common/Card';
-import { Button } from '../../../src/components/common/Button';
-import { COLORS, SPACING, RADII, TYPOGRAPHY } from '../../../src/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { MOBILE_THEME, SPACING, RADII, SHADOWS } from '../../../src/theme';
 import { useAuth } from '../../../src/context/AuthContext';
 import { AppRole } from '@zenith/shared';
 
@@ -17,7 +21,7 @@ export default function SettingsScreen() {
 
   const handleRoleSwitch = async (role: AppRole) => {
     await loginAsRole(role);
-    setFeedback(`Switched active operational tier to: ${role.replace('_', ' ').toUpperCase()}`);
+    setFeedback(`Switched operational role to: ${role.replace('_', ' ').toUpperCase()}`);
     setTimeout(() => setFeedback(null), 3000);
   };
 
@@ -27,132 +31,130 @@ export default function SettingsScreen() {
   };
 
   const handleSignOut = async () => {
-    await logout();
-    router.replace('/(auth)/signed-out');
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm('Are you sure you want to sign out?');
+      if (confirmed) {
+        await logout();
+        router.replace('/(auth)/login');
+      }
+    } else {
+      Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            await logout();
+            router.replace('/(auth)/login');
+          },
+        },
+      ]);
+    }
   };
 
   return (
     <View style={styles.screen}>
-      <Header title="SETTINGS" subtitle="Workspace & Security" showBack />
-      <DemoBanner />
+      <View style={styles.headerBar}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="arrow-back" size={22} color={MOBILE_THEME.navyHeader} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Settings</Text>
+        <View style={{ width: 36 }} />
+      </View>
 
       {feedback ? (
         <View style={styles.toastBox}>
-          <Text style={styles.toastText}>✓ {feedback}</Text>
+          <Ionicons name="checkmark-circle" size={16} color="#16A34A" style={{ marginRight: 6 }} />
+          <Text style={styles.toastText}>{feedback}</Text>
         </View>
       ) : null}
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Active Account Identity */}
-        <Card variant="highlighted" style={styles.card}>
-          <Text style={styles.cardPre}>CURRENT WORKSPACE IDENTITY</Text>
-          <Text style={styles.cardName}>{user?.full_name || 'Candidate'}</Text>
-          <Text style={styles.cardEmail}>{user?.email}</Text>
-          <View style={styles.badgeRow}>
-            <Badge
-              label={user ? user.role.replace('_', ' ') : 'MEMBER'}
-              variant="role"
-              role={user?.role}
-            />
+        {/* User Card */}
+        <View style={styles.profileCard}>
+          <View style={styles.avatarCircle}>
+            <Text style={styles.avatarText}>
+              {user?.full_name ? user.full_name.slice(0, 2).toUpperCase() : 'Z5'}
+            </Text>
           </View>
-        </Card>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.profileName}>{user?.full_name || 'Candidate'}</Text>
+            <Text style={styles.profileRole}>
+              {user ? user.role.replace('_', ' ').toUpperCase() : 'MEMBER'} • Team 5
+            </Text>
+            <Text style={styles.profileEmail}>{user?.email}</Text>
+          </View>
+        </View>
 
-        {/* Live Evaluator Role Switcher */}
+        {/* Role Switcher */}
         <Text style={styles.sectionTitle}>EVALUATOR ROLE SIMULATOR</Text>
-        <Card variant="default" style={styles.card}>
-          <Text style={styles.desc}>
-            Switch your active profile to test role-gated permissions in real time without signing out:
+        <View style={styles.menuCard}>
+          <Text style={styles.sectionDesc}>
+            Test role-gated access in real time without entering passwords:
           </Text>
-
           <View style={styles.roleGrid}>
-            <TouchableOpacity
-              style={[
-                styles.roleBtn,
-                styles.btnGold,
-                user?.role === 'captain' && styles.roleActiveGold,
-              ]}
-              onPress={() => handleRoleSwitch('captain')}
-            >
-              <Text style={styles.roleTitle}>CAPTAIN</Text>
-              <Text style={styles.roleDesc}>Score editor & approvals</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.roleBtn,
-                styles.btnCyan,
-                user?.role === 'vice_captain' && styles.roleActiveCyan,
-              ]}
-              onPress={() => handleRoleSwitch('vice_captain')}
-            >
-              <Text style={styles.roleTitle}>VICE-CAPTAIN</Text>
-              <Text style={styles.roleDesc}>Score editor & squad lead</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.roleBtn,
-                styles.btnElectric,
-                user?.role === 'team_admin' && styles.roleActiveElectric,
-              ]}
-              onPress={() => handleRoleSwitch('team_admin')}
-            >
-              <Text style={styles.roleTitle}>TEAM ADMIN</Text>
-              <Text style={styles.roleDesc}>Audits & governance</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.roleBtn,
-                styles.btnSlate,
-                user?.role === 'member' && styles.roleActiveSlate,
-              ]}
-              onPress={() => handleRoleSwitch('member')}
-            >
-              <Text style={styles.roleTitle}>MEMBER</Text>
-              <Text style={styles.roleDesc}>Read-only scores & reflections</Text>
-            </TouchableOpacity>
+            {(['captain', 'vice_captain', 'team_admin', 'member'] as const).map((r) => {
+              const isActive = user?.role === r;
+              return (
+                <TouchableOpacity
+                  key={r}
+                  style={[styles.roleBtn, isActive && styles.roleBtnActive]}
+                  onPress={() => handleRoleSwitch(r)}
+                >
+                  <Text style={[styles.roleTitle, isActive && styles.roleTitleActive]}>
+                    {r.replace('_', ' ').toUpperCase()}
+                  </Text>
+                  <Text style={styles.roleDesc}>
+                    {r === 'captain'
+                      ? 'Score editor & approvals'
+                      : r === 'vice_captain'
+                      ? 'Score editor'
+                      : r === 'team_admin'
+                      ? 'Governance & audits'
+                      : 'Read-only candidate'}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
-        </Card>
+        </View>
 
         {/* Security Parameters */}
         <Text style={styles.sectionTitle}>SECURITY ARCHITECTURE STATUS</Text>
-        <Card variant="default" style={styles.card}>
+        <View style={styles.menuCard}>
           <View style={styles.statusRow}>
             <Text style={styles.statusLabel}>Session Persistence</Text>
             <Text style={styles.statusVal}>expo-secure-store (Active)</Text>
           </View>
           <View style={styles.statusRow}>
-            <Text style={styles.statusLabel}>PostgreSQL RLS Enforcement</Text>
-            <Text style={styles.statusVal}>Enabled on 100% Tables</Text>
+            <Text style={styles.statusLabel}>PostgreSQL RLS</Text>
+            <Text style={styles.statusVal}>Enforced on 100% Tables</Text>
           </View>
           <View style={styles.statusRow}>
             <Text style={styles.statusLabel}>Realtime Fallback</Text>
             <Text style={styles.statusVal}>10s Polling Heartbeat</Text>
           </View>
-          <View style={styles.statusRow}>
+          <View style={[styles.statusRow, { borderBottomWidth: 0 }]}>
             <Text style={styles.statusLabel}>Public Self-Registration</Text>
-            <Text style={[styles.statusVal, { color: COLORS.danger }]}>Strictly Disabled</Text>
+            <Text style={[styles.statusVal, { color: '#DC2626' }]}>Strictly Disabled</Text>
           </View>
-        </Card>
+        </View>
 
         {/* Cache & Maintenance */}
-        <Button
-          title="CLEAR CLIENT CACHE"
-          onPress={handleClearCache}
-          variant="outline"
-          size="md"
-          style={styles.actionBtn}
-        />
+        <TouchableOpacity style={styles.actionBtn} onPress={handleClearCache}>
+          <Text style={styles.actionBtnText}>Clear Client Cache</Text>
+        </TouchableOpacity>
 
         {/* Sign Out */}
-        <Button
-          title="LOG OUT OF WORKSPACE"
-          onPress={handleSignOut}
-          variant="danger"
-          size="lg"
-          style={styles.actionBtn}
-        />
+        <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
+          <Ionicons name="log-out-outline" size={18} color="#DC2626" style={{ marginRight: 8 }} />
+          <Text style={styles.signOutText}>Sign Out of Workspace</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -161,61 +163,112 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: COLORS.backgroundDeep,
+    backgroundColor: MOBILE_THEME.bgLight,
+  },
+  headerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.lg,
+    paddingTop: Platform.OS === 'ios' ? 52 : 36,
+    paddingBottom: SPACING.md,
+    backgroundColor: MOBILE_THEME.surfaceWhite,
+    borderBottomWidth: 1,
+    borderBottomColor: MOBILE_THEME.borderLight,
+  },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: RADII.full,
+    backgroundColor: MOBILE_THEME.bgLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: MOBILE_THEME.navyHeader,
+  },
+  toastBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    borderBottomWidth: 1,
+    borderBottomColor: '#BBF7D0',
+    paddingVertical: 10,
+    paddingHorizontal: SPACING.lg,
+  },
+  toastText: {
+    color: '#15803D',
+    fontSize: 12,
+    fontWeight: '600',
   },
   scroll: {
     padding: SPACING.lg,
     paddingBottom: SPACING['5xl'],
   },
-  toastBox: {
-    backgroundColor: COLORS.successSoft,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.success,
-    paddingVertical: SPACING.xs + 2,
-    paddingHorizontal: SPACING.md,
+  profileCard: {
+    backgroundColor: MOBILE_THEME.surfaceWhite,
+    borderRadius: RADII.xl,
+    padding: SPACING.md + 2,
+    flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: MOBILE_THEME.borderLight,
+    marginBottom: SPACING.lg,
+    ...SHADOWS.card,
   },
-  toastText: {
-    color: COLORS.success,
+  avatarCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: RADII.full,
+    backgroundColor: MOBILE_THEME.navyHeader,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.md,
+  },
+  avatarText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  profileName: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: MOBILE_THEME.navyHeader,
+  },
+  profileRole: {
     fontSize: 11,
     fontWeight: '700',
-  },
-  card: {
-    marginBottom: SPACING.lg,
-  },
-  cardPre: {
-    color: COLORS.brandCyanLight,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  cardName: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.lg,
-    fontWeight: '800',
+    color: MOBILE_THEME.skyBlue,
     marginTop: 2,
   },
-  cardEmail: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.sizes.xs,
-    marginTop: 2,
-    marginBottom: SPACING.sm,
-  },
-  badgeRow: {
-    flexDirection: 'row',
+  profileEmail: {
+    fontSize: 11,
+    color: MOBILE_THEME.textMuted,
+    marginTop: 1,
   },
   sectionTitle: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.sizes.xs,
+    fontSize: 11,
     fontWeight: '800',
     letterSpacing: 0.8,
+    color: MOBILE_THEME.textSecondary,
+    marginBottom: SPACING.xs + 2,
+    marginTop: SPACING.xs,
+  },
+  sectionDesc: {
+    fontSize: 12,
+    color: MOBILE_THEME.textSecondary,
     marginBottom: SPACING.sm,
   },
-  desc: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.sizes.xs,
-    lineHeight: 18,
-    marginBottom: SPACING.md,
+  menuCard: {
+    backgroundColor: MOBILE_THEME.surfaceWhite,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: MOBILE_THEME.borderLight,
+    padding: SPACING.md,
+    marginBottom: SPACING.lg,
+    ...SHADOWS.card,
   },
   roleGrid: {
     flexDirection: 'row',
@@ -224,68 +277,75 @@ const styles = StyleSheet.create({
   },
   roleBtn: {
     width: '48%',
-    backgroundColor: COLORS.surfaceElevated,
+    backgroundColor: MOBILE_THEME.bgLight,
     borderRadius: RADII.lg,
-    padding: SPACING.md,
+    padding: SPACING.sm + 2,
     borderWidth: 1,
-    marginBottom: SPACING.sm,
+    borderColor: MOBILE_THEME.borderLight,
+    marginBottom: SPACING.xs + 2,
   },
-  btnGold: {
-    borderColor: 'rgba(245, 158, 11, 0.4)',
-  },
-  btnCyan: {
-    borderColor: 'rgba(6, 182, 212, 0.4)',
-  },
-  btnElectric: {
-    borderColor: 'rgba(37, 99, 235, 0.4)',
-  },
-  btnSlate: {
-    borderColor: COLORS.borderSubtle,
-  },
-  roleActiveGold: {
-    backgroundColor: COLORS.accentGoldSoft,
-    borderColor: COLORS.accentGold,
-  },
-  roleActiveCyan: {
-    backgroundColor: COLORS.brandCyanSoft,
-    borderColor: COLORS.brandCyan,
-  },
-  roleActiveElectric: {
-    backgroundColor: COLORS.brandElectricSoft,
-    borderColor: COLORS.brandElectric,
-  },
-  roleActiveSlate: {
-    backgroundColor: 'rgba(148, 163, 184, 0.2)',
-    borderColor: '#94A3B8',
+  roleBtnActive: {
+    backgroundColor: MOBILE_THEME.bgSoftBlue,
+    borderColor: MOBILE_THEME.skyBlue,
   },
   roleTitle: {
-    color: COLORS.textPrimary,
     fontSize: 11,
     fontWeight: '800',
-    letterSpacing: 0.5,
+    color: MOBILE_THEME.navyHeader,
+  },
+  roleTitleActive: {
+    color: MOBILE_THEME.skyBlue,
   },
   roleDesc: {
-    color: COLORS.textMuted,
     fontSize: 9,
+    color: MOBILE_THEME.textMuted,
     marginTop: 2,
   },
   statusRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: SPACING.xs + 2,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(30, 51, 104, 0.3)',
+    borderBottomColor: MOBILE_THEME.borderLight,
   },
   statusLabel: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.sizes.xs,
+    fontSize: 12,
+    color: MOBILE_THEME.navyHeader,
+    fontWeight: '500',
   },
   statusVal: {
-    color: COLORS.brandCyanLight,
-    fontSize: TYPOGRAPHY.sizes.xs,
+    fontSize: 12,
+    color: MOBILE_THEME.skyBlue,
     fontWeight: '700',
   },
   actionBtn: {
-    marginBottom: SPACING.md,
+    backgroundColor: MOBILE_THEME.surfaceWhite,
+    borderRadius: RADII.lg,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: MOBILE_THEME.borderLight,
+    marginBottom: SPACING.sm,
+  },
+  actionBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: MOBILE_THEME.navyHeader,
+  },
+  signOutBtn: {
+    backgroundColor: '#FEF2F2',
+    borderRadius: RADII.lg,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    marginBottom: SPACING.xl,
+  },
+  signOutText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#DC2626',
   },
 });

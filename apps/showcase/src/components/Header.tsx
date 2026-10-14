@@ -9,7 +9,11 @@ export const Header: React.FC = () => {
         {/* Brand / Logo */}
         <Link href="/" style={styles.brand}>
           <div style={styles.logoBadge}>
-            <SparklesIcon size={16} color="#C084FC" />
+            <img
+              src="/images/zenith-logo.jpg"
+              alt="ZENITH Logo"
+              style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }}
+            />
           </div>
           <div style={styles.brandTitleGroup}>
             <span style={styles.brandName}>ZENITH</span>

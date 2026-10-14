@@ -1,159 +1,187 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
 import { useRouter } from 'expo-router';
-import { COLORS, SPACING, RADII, TYPOGRAPHY, SHADOWS } from '../../src/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { MOBILE_THEME, SPACING, RADII, SHADOWS } from '../../src/theme';
 import { useAuth } from '../../src/context/AuthContext';
-import { Header } from '../../src/components/common/Header';
-import { DemoBanner } from '../../src/components/common/DemoBanner';
-import { Card } from '../../src/components/common/Card';
-import { Badge } from '../../src/components/common/Badge';
 import { DEMO_SCOREBOARD_GROUPS, DEMO_TRAINING_DAYS } from '@zenith/shared';
 
-export default function DashboardScreen() {
+export default function MemberDashboardScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
-  const ourTeam =
-    DEMO_SCOREBOARD_GROUPS.find((g) => g.is_current_team) || DEMO_SCOREBOARD_GROUPS[1];
-  const activeDay =
-    DEMO_TRAINING_DAYS.find((d) => d.status === 'in_progress') || DEMO_TRAINING_DAYS[1];
+  const zenithTeam =
+    DEMO_SCOREBOARD_GROUPS.find((g) => g.group_number === 5 || g.is_current_team) ||
+    DEMO_SCOREBOARD_GROUPS[1];
+
+  const completedDays = DEMO_TRAINING_DAYS.filter((d) => d.status === 'completed').length;
+  const totalDays = DEMO_TRAINING_DAYS.length;
 
   return (
-    <View style={styles.screen}>
-      <Header
-        title="ZENITH"
-        subtitle="Team No. 5 Workspace"
-      />
-      <DemoBanner />
-
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Welcome Greeting */}
-        <View style={styles.greetingBox}>
-          <Text style={styles.welcomeLabel}>WELCOME BACK,</Text>
-          <Text style={styles.userName}>{user?.full_name || 'Team Member'}</Text>
-          <Text style={styles.userRoleText}>
-            Operational Role: <Text style={styles.roleHighlight}>{user?.role.replace('_', ' ').toUpperCase()}</Text>
-          </Text>
-        </View>
-
-        {/* Hero Card: Live Standing Snapshot */}
-        <Card variant="highlighted" style={styles.heroCard}>
-          <View style={styles.heroTop}>
-            <View>
-              <Text style={styles.heroPre}>COMPETITION STANDINGS</Text>
-              <Text style={styles.heroSquadName}>ZENITH — TEAM 05</Text>
-            </View>
-            <View style={styles.rankPill}>
-              <Text style={styles.rankPillText}>RANK #{ourTeam.rank}</Text>
+    <View style={[styles.screen, { paddingTop: Math.max(insets.top, 16) }]}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Top Header Card: LIVE mPOWER SCOREBOARD (Screen 3 Reference) */}
+        <View style={styles.scoreboardBanner}>
+          <View style={styles.bannerTopRow}>
+            <Text style={styles.bannerTitle}>LIVE mPOWER SCOREBOARD</Text>
+            <View style={styles.liveBadge}>
+              <View style={styles.liveDot} />
+              <Text style={styles.liveText}>LIVE</Text>
             </View>
           </View>
 
-          <View style={styles.heroStatsRow}>
-            <View style={styles.statCol}>
-              <Text style={styles.statNumber}>{ourTeam.current_points}</Text>
-              <Text style={styles.statLabel}>TOTAL POINTS</Text>
+          <View style={styles.scoreboardContent}>
+            {/* Left: Squad Crest */}
+            <View style={styles.squadCol}>
+              <View style={styles.logoBadgeContainer}>
+                <Image
+                  source={require('../../assets/zenith-logo.jpg')}
+                  style={styles.logoImageSmall}
+                  resizeMode="cover"
+                />
+              </View>
+              <Text style={styles.squadName}>ZENITH</Text>
+              <Text style={styles.squadTeam}>Team No. 5</Text>
             </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statCol}>
-              <Text style={[styles.statNumber, styles.deltaColor]}>
-                +{ourTeam.current_points - ourTeam.previous_points}
-              </Text>
-              <Text style={styles.statLabel}>RECENT GAIN</Text>
+
+            {/* Middle: Rank */}
+            <View style={styles.metricCol}>
+              <Text style={styles.metricLabel}>Rank</Text>
+              <Text style={styles.metricValue}>#{zenithTeam.rank}</Text>
             </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statCol}>
-              <Text style={styles.statNumber}>+{ourTeam.bonus_points}</Text>
-              <Text style={styles.statLabel}>BONUS POINTS</Text>
+
+            {/* Right: Current Score */}
+            <View style={styles.metricCol}>
+              <Text style={styles.metricLabel}>Current Score</Text>
+              <Text style={styles.metricValue}>{zenithTeam.current_points} <Text style={styles.ptsUnit}>pts</Text></Text>
             </View>
           </View>
 
           <TouchableOpacity
-            style={styles.heroActionBtn}
+            style={styles.scoreboardLinkRow}
             onPress={() => router.push('/(tabs)/scoreboard')}
             accessibilityRole="button"
-            accessibilityLabel="View full competition leaderboard"
           >
-            <Text style={styles.heroActionText}>OPEN FULL SCOREBOARD →</Text>
-          </TouchableOpacity>
-        </Card>
-
-        {/* Current Active Journey Day */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>CURRENT TRAINING MILESTONE</Text>
-          <TouchableOpacity onPress={() => router.push('/(tabs)/journey')}>
-            <Text style={styles.sectionActionText}>VIEW 4 DAYS →</Text>
+            <Text style={styles.scoreboardLinkText}>View full scoreboard</Text>
+            <Ionicons name="arrow-forward" size={14} color="#38BDF8" />
           </TouchableOpacity>
         </View>
 
-        <Card variant="default" style={styles.journeyCard}>
-          <View style={styles.journeyHeader}>
-            <View>
-              <Text style={styles.dayIndex}>DAY 0{activeDay.day_number} ACTIVE</Text>
-              <Text style={styles.dayDate}>{activeDay.schedule_date}</Text>
+        {/* Section: Team Progress */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionTitle}>Team Progress</Text>
+            <Text style={styles.progressCounter}>{completedDays}/{totalDays}</Text>
+          </View>
+          <Text style={styles.progressSub}>Training Days Completed</Text>
+
+          {/* Progress Bar */}
+          <View style={styles.progressBarBg}>
+            <View
+              style={[
+                styles.progressBarFill,
+                { width: `${(completedDays / totalDays) * 100}%` },
+              ]}
+            />
+          </View>
+
+          {/* 3 Metric Stat Cards */}
+          <View style={styles.statsRow}>
+            <View style={styles.statBox}>
+              <Text style={styles.statBigNumber}>8</Text>
+              <Text style={styles.statBoxLabel}>Team Members</Text>
             </View>
-            <Badge label="IN PROGRESS" variant="status" status="in_progress" />
+            <View style={styles.statBox}>
+              <Text style={styles.statBigNumber}>12</Text>
+              <Text style={styles.statBoxLabel}>Resources</Text>
+            </View>
+            <View style={styles.statBox}>
+              <Text style={styles.statBigNumber}>5</Text>
+              <Text style={styles.statBoxLabel}>Reflections</Text>
+            </View>
           </View>
+        </View>
 
-          <Text style={styles.dayTitle}>{activeDay.title}</Text>
-          <Text style={styles.dayDesc} numberOfLines={2}>
-            {activeDay.description}
-          </Text>
-
-          <View style={styles.focusPillsRow}>
-            {activeDay.focus_areas.slice(0, 3).map((area, i) => (
-              <View key={i} style={styles.focusPill}>
-                <Text style={styles.focusPillText}>#{area}</Text>
+        {/* Section: Quick Actions (2x2 Grid) */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.quickGrid}>
+            {/* 1. View Team */}
+            <TouchableOpacity
+              style={styles.actionTile}
+              onPress={() => router.push('/(tabs)/team')}
+              accessibilityRole="button"
+            >
+              <View style={styles.actionIconBox}>
+                <Ionicons name="people-outline" size={20} color="#0284C7" />
               </View>
-            ))}
+              <Text style={styles.actionTileText}>View Team</Text>
+            </TouchableOpacity>
+
+            {/* 2. Training Journey */}
+            <TouchableOpacity
+              style={styles.actionTile}
+              onPress={() => router.push('/(tabs)/journey')}
+              accessibilityRole="button"
+            >
+              <View style={styles.actionIconBox}>
+                <Ionicons name="calendar-outline" size={20} color="#0284C7" />
+              </View>
+              <Text style={styles.actionTileText}>Training Journey</Text>
+            </TouchableOpacity>
+
+            {/* 3. Live Scoreboard */}
+            <TouchableOpacity
+              style={styles.actionTile}
+              onPress={() => router.push('/(tabs)/scoreboard')}
+              accessibilityRole="button"
+            >
+              <View style={styles.actionIconBox}>
+                <Ionicons name="trophy-outline" size={20} color="#0284C7" />
+              </View>
+              <Text style={styles.actionTileText}>Live Scoreboard</Text>
+            </TouchableOpacity>
+
+            {/* 4. Resources */}
+            <TouchableOpacity
+              style={styles.actionTile}
+              onPress={() => router.push('/(tabs)/workspace/resources')}
+              accessibilityRole="button"
+            >
+              <View style={styles.actionIconBox}>
+                <Ionicons name="folder-open-outline" size={20} color="#0284C7" />
+              </View>
+              <Text style={styles.actionTileText}>Resources</Text>
+            </TouchableOpacity>
           </View>
-        </Card>
+        </View>
 
-        {/* Quick Launchpad Grid */}
-        <Text style={styles.sectionTitle}>WORKSPACE DESTINATIONS</Text>
-        <View style={styles.grid}>
-          <TouchableOpacity
-            style={styles.tile}
-            onPress={() => router.push('/(tabs)/team')}
-            accessibilityRole="button"
-            accessibilityLabel="Team Directory"
-          >
-            <Text style={styles.tileIcon}>👥</Text>
-            <Text style={styles.tileTitle}>Team Directory</Text>
-            <Text style={styles.tileSub}>8 Verified Members</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.tile}
-            onPress={() => router.push('/(tabs)/workspace/reflections')}
-            accessibilityRole="button"
-            accessibilityLabel="Daily Reflections"
-          >
-            <Text style={styles.tileIcon}>✍</Text>
-            <Text style={styles.tileTitle}>Reflections</Text>
-            <Text style={styles.tileSub}>Day Logs & Insights</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.tile}
-            onPress={() => router.push('/(tabs)/workspace/resources')}
-            accessibilityRole="button"
-            accessibilityLabel="Training Resources"
-          >
-            <Text style={styles.tileIcon}>📄</Text>
-            <Text style={styles.tileTitle}>Resources</Text>
-            <Text style={styles.tileSub}>Study Guides & PDFs</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.tile}
-            onPress={() => router.push('/(tabs)/workspace/gallery')}
-            accessibilityRole="button"
-            accessibilityLabel="Media Gallery"
-          >
-            <Text style={styles.tileIcon}>📷</Text>
-            <Text style={styles.tileTitle}>Media Gallery</Text>
-            <Text style={styles.tileSub}>Training Moments</Text>
-          </TouchableOpacity>
+        {/* Section: Recent Updates */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Recent Updates</Text>
+          <View style={styles.recentUpdateCard}>
+            <View style={styles.recentAvatar}>
+              <Ionicons name="person" size={16} color="#0284C7" />
+            </View>
+            <View style={styles.recentInfo}>
+              <Text style={styles.recentTitle}>
+                {user?.full_name || 'You'} updated operational profile
+              </Text>
+              <Text style={styles.recentTime}>Verified Audit Log • 2 hours ago</Text>
+            </View>
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -163,213 +191,254 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: COLORS.backgroundDeep,
+    backgroundColor: MOBILE_THEME.bgLight,
   },
   scroll: {
-    padding: SPACING.lg,
-    paddingBottom: SPACING['4xl'],
+    padding: 16,
+    paddingBottom: 40,
   },
-  greetingBox: {
-    marginBottom: SPACING.lg,
+  scoreboardBanner: {
+    backgroundColor: MOBILE_THEME.navyCard,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    shadowColor: '#070D1E',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  welcomeLabel: {
-    color: COLORS.brandCyanLight,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
-  userName: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.xl,
-    fontWeight: '800',
-    marginTop: 2,
-  },
-  userRoleText: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.sizes.xs,
-    marginTop: 2,
-  },
-  roleHighlight: {
-    color: COLORS.accentGoldBright,
-    fontWeight: '700',
-  },
-  heroCard: {
-    marginBottom: SPACING.xl,
-  },
-  heroTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: SPACING.md,
-  },
-  heroPre: {
-    color: COLORS.brandCyanLight,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  heroSquadName: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.lg,
-    fontWeight: '800',
-    marginTop: 2,
-  },
-  rankPill: {
-    backgroundColor: COLORS.brandCyanSoft,
-    borderWidth: 1,
-    borderColor: COLORS.brandCyan,
-    borderRadius: RADII.full,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: 3,
-  },
-  rankPillText: {
-    color: COLORS.brandCyanLight,
-    fontWeight: '800',
-    fontSize: 11,
-    letterSpacing: 0.5,
-  },
-  heroStatsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    backgroundColor: COLORS.surfaceElevated,
-    borderRadius: RADII.lg,
-    paddingVertical: SPACING.md,
-    marginVertical: SPACING.sm,
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-  },
-  statCol: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  statNumber: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.xl,
-    fontWeight: '800',
-  },
-  deltaColor: {
-    color: COLORS.success,
-  },
-  statLabel: {
-    color: COLORS.textMuted,
-    fontSize: 9,
-    fontWeight: '700',
-    marginTop: 2,
-    letterSpacing: 0.5,
-  },
-  statDivider: {
-    width: 1,
-    height: 28,
-    backgroundColor: COLORS.borderSubtle,
-  },
-  heroActionBtn: {
-    marginTop: SPACING.md,
-    alignItems: 'center',
-    paddingVertical: SPACING.xs,
-  },
-  heroActionText: {
-    color: COLORS.brandCyanLight,
-    fontWeight: '800',
-    fontSize: 11,
-    letterSpacing: 0.8,
-  },
-  sectionHeader: {
+  bannerTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SPACING.sm,
+    marginBottom: 14,
   },
-  sectionTitle: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.sizes.xs,
+  bannerTitle: {
+    color: '#CBD5E1',
+    fontSize: 11,
     fontWeight: '800',
     letterSpacing: 0.8,
-    marginBottom: SPACING.sm,
   },
-  sectionActionText: {
-    color: COLORS.brandCyanLight,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  journeyCard: {
-    marginBottom: SPACING.xl,
-  },
-  journeyHeader: {
+  liveBadge: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: SPACING.xs,
-  },
-  dayIndex: {
-    color: COLORS.brandCyanLight,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  dayDate: {
-    color: COLORS.textMuted,
-    fontSize: 11,
-    marginTop: 2,
-  },
-  dayTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.md,
-    fontWeight: '700',
-    marginTop: SPACING.xs,
-    marginBottom: 4,
-  },
-  dayDesc: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.sizes.xs,
-    lineHeight: 18,
-    marginBottom: SPACING.sm,
-  },
-  focusPillsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  focusPill: {
-    backgroundColor: COLORS.surfaceElevated,
-    borderRadius: RADII.full,
-    paddingHorizontal: SPACING.sm,
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    paddingHorizontal: 8,
     paddingVertical: 2,
-    marginRight: SPACING.xs,
-    borderWidth: 1,
-    borderColor: 'rgba(30, 51, 104, 0.5)',
+    borderRadius: 12,
   },
-  focusPillText: {
-    color: COLORS.textMuted,
+  liveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10B981',
+  },
+  liveText: {
+    color: '#10B981',
     fontSize: 10,
+    fontWeight: '800',
+  },
+  scoreboardContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  squadCol: {
+    alignItems: 'flex-start',
+  },
+  logoBadgeContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#E5A93C',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+    overflow: 'hidden',
+  },
+  logoImageSmall: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+  },
+  squadName: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  squadTeam: {
+    color: '#94A3B8',
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  metricCol: {
+    alignItems: 'center',
+  },
+  metricLabel: {
+    color: '#94A3B8',
+    fontSize: 11,
+    marginBottom: 2,
+  },
+  metricValue: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  ptsUnit: {
+    fontSize: 12,
+    color: '#38BDF8',
     fontWeight: '600',
   },
-  grid: {
+  scoreboardLinkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 12,
+  },
+  scoreboardLinkText: {
+    color: '#38BDF8',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: MOBILE_THEME.navyHeader,
+    marginBottom: 4,
+  },
+  progressCounter: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  progressSub: {
+    fontSize: 12,
+    color: '#64748B',
+    marginBottom: 8,
+  },
+  progressBarBg: {
+    height: 6,
+    backgroundColor: '#E2E8F0',
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginBottom: 14,
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#0284C7',
+    borderRadius: 3,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  statBox: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 14,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  statBigNumber: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: MOBILE_THEME.navyHeader,
+  },
+  statBoxLabel: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  quickGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    gap: 12,
+    marginTop: 8,
   },
-  tile: {
+  actionTile: {
     width: '48%',
-    backgroundColor: COLORS.surfaceCard,
-    borderRadius: RADII.xl,
-    padding: SPACING.lg,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
     borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-    marginBottom: SPACING.md,
-    ...SHADOWS.card,
+    borderColor: '#E2E8F0',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  tileIcon: {
-    fontSize: 26,
-    marginBottom: SPACING.sm,
+  actionIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#E0F2FE',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  tileTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.sm,
+  actionTileText: {
+    fontSize: 13,
     fontWeight: '700',
+    color: MOBILE_THEME.navyHeader,
+    flex: 1,
   },
-  tileSub: {
-    color: COLORS.textMuted,
-    fontSize: 10,
+  recentUpdateCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginTop: 8,
+  },
+  recentAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#E0F2FE',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  recentInfo: {
+    flex: 1,
+  },
+  recentTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: MOBILE_THEME.navyHeader,
+  },
+  recentTime: {
+    fontSize: 11,
+    color: '#94A3B8',
     marginTop: 2,
   },
 });

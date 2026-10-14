@@ -4,12 +4,14 @@ import { Slot, useRouter, useSegments } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
-import { COLORS, TYPOGRAPHY, RADII, SPACING } from '../src/theme';
+import { COLORS, RADII, SPACING } from '../src/theme';
 import { Button } from '../src/components/common/Button';
+import { ZenithLogo } from '../src/components/common/ZenithLogo';
+import { MountainSummitView } from '../src/components/common/MountainSummitView';
 
 // Internal navigation gating engine
 function NavigationGuard() {
-  const { status, error, clearError, triggerAuthError } = useAuth();
+  const { status, error, clearError } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
@@ -27,31 +29,36 @@ function NavigationGuard() {
     }
   }, [status, segments]);
 
-  // Screen 1: Branded Splash / Secure Session Loading Screen
+  // Screen 1: Branded Twilight Mountain Summit Launch Screen (Matching Blueprint Screen 1)
   if (status === 'initializing') {
     return (
       <View style={styles.splashContainer} accessibilityRole="alert" accessibilityLabel="Loading secure session">
         <StatusBar style="light" />
-        <View style={styles.crestCircle}>
-          <Text style={styles.crestText}>ZENITH</Text>
-          <Text style={styles.crestSub}>TEAM 05</Text>
-        </View>
-        <Text style={styles.splashTitle}>ZENITH — TEAM NO. 5</Text>
-        <Text style={styles.splashTagline}>mPOWER Placement Training Program</Text>
 
-        <View style={styles.loadingBox}>
-          <ActivityIndicator size="large" color={COLORS.brandCyan} />
-          <Text style={styles.sessionText}>Verifying Hardware Keystore & Session...</Text>
+        <View style={styles.splashCenter}>
+          {/* 8-pointed golden compass star */}
+          <View style={styles.logoWrapper}>
+            <ZenithLogo size={68} color="#E5A93C" />
+          </View>
+          <Text style={styles.splashBrand}>ZENITH</Text>
+          <Text style={styles.splashTeam}>TEAM NO. 5</Text>
+          <Text style={styles.splashSubtitle}>mPOWER Placement Training Program</Text>
+
+          <View style={styles.loadingBox}>
+            <ActivityIndicator size="small" color="#E5A93C" />
+            <Text style={styles.sessionText}>Checking session...</Text>
+          </View>
         </View>
 
-        <Text style={styles.disclaimerText}>
-          SECURE EVALUATION WORKSPACE • CLOSED PROVISIONING
-        </Text>
+        {/* Alpine Summit Silhouette & Tagline at bottom */}
+        <View style={styles.mountainFooter}>
+          <MountainSummitView />
+        </View>
       </View>
     );
   }
 
-  // Screen 3b: Authentication Error Screen
+  // Authentication Error Screen
   if (status === 'error' && error) {
     return (
       <View style={styles.errorContainer} accessibilityRole="alert">
@@ -89,7 +96,7 @@ export default function RootLayout() {
         <View style={styles.webFrame}>
           <SafeAreaProvider>
             <AuthProvider>
-              <StatusBar style="light" />
+              <StatusBar style="dark" />
               <NavigationGuard />
             </AuthProvider>
           </SafeAreaProvider>
@@ -101,7 +108,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <AuthProvider>
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
         <NavigationGuard />
       </AuthProvider>
     </SafeAreaProvider>
@@ -111,7 +118,7 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   webOuterContainer: {
     flex: 1,
-    backgroundColor: '#030712',
+    backgroundColor: '#0F172A',
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: '100vh' as unknown as number,
@@ -122,139 +129,118 @@ const styles = StyleSheet.create({
     maxWidth: 420,
     height: '100%',
     maxHeight: 880,
-    backgroundColor: COLORS.backgroundDeep,
+    backgroundColor: '#F8FAFC',
     borderRadius: 36,
     borderWidth: 1.5,
-    borderColor: 'rgba(56, 189, 248, 0.4)',
+    borderColor: 'rgba(148, 163, 184, 0.4)',
     overflow: 'hidden',
-    shadowColor: '#00F0FF',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.3,
     shadowRadius: 25,
     elevation: 20,
   },
   splashContainer: {
     flex: 1,
-    backgroundColor: COLORS.backgroundDeep,
+    backgroundColor: '#070D1E',
+    justifyContent: 'space-between',
+    paddingTop: 80,
+  },
+  splashCenter: {
+    alignItems: 'center',
+    paddingHorizontal: SPACING.xl,
+  },
+  logoWrapper: {
+    marginBottom: SPACING.md,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: SPACING.xxl,
   },
-  crestCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: RADII.full,
-    backgroundColor: COLORS.surfaceCard,
-    borderWidth: 2,
-    borderColor: COLORS.brandCyan,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACING.xl,
-    shadowColor: COLORS.brandCyan,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
+  splashBrand: {
+    color: '#FFFFFF',
+    fontSize: 28,
+    fontWeight: '900',
+    letterSpacing: 2,
+    marginBottom: 4,
   },
-  crestText: {
-    color: COLORS.brandCyanLight,
-    fontSize: TYPOGRAPHY.sizes.md,
+  splashTeam: {
+    color: '#E5A93C',
+    fontSize: 12,
     fontWeight: '800',
     letterSpacing: 1.5,
+    marginBottom: 6,
   },
-  crestSub: {
-    color: COLORS.accentGoldBright,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 1,
-    marginTop: 2,
-  },
-  splashTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.xl,
-    fontWeight: '800',
-    letterSpacing: 1,
-    marginBottom: SPACING.xs,
+  splashSubtitle: {
+    color: '#94A3B8',
+    fontSize: 12,
+    fontWeight: '500',
     textAlign: 'center',
-  },
-  splashTagline: {
-    color: COLORS.brandCyanLight,
-    fontSize: TYPOGRAPHY.sizes.sm,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-    textAlign: 'center',
-    marginBottom: SPACING['3xl'],
+    marginBottom: SPACING.xl,
   },
   loadingBox: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: SPACING.xl,
+    marginTop: SPACING.lg,
   },
   sessionText: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.sizes.xs,
-    marginTop: SPACING.md,
+    color: '#94A3B8',
+    fontSize: 12,
+    marginLeft: 8,
     fontWeight: '500',
   },
-  disclaimerText: {
-    position: 'absolute',
-    bottom: SPACING.xxl,
-    color: COLORS.textMuted,
-    fontSize: 10,
-    letterSpacing: 0.8,
-    fontWeight: '700',
-    textAlign: 'center',
+  mountainFooter: {
+    width: '100%',
   },
   errorContainer: {
     flex: 1,
-    backgroundColor: COLORS.backgroundDeep,
+    backgroundColor: '#070D1E',
     alignItems: 'center',
     justifyContent: 'center',
     padding: SPACING.xxl,
   },
   errorIconCircle: {
-    width: 72,
-    height: 72,
+    width: 64,
+    height: 64,
     borderRadius: RADII.full,
-    backgroundColor: COLORS.dangerSoft,
-    borderWidth: 2,
-    borderColor: COLORS.danger,
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderWidth: 1,
+    borderColor: '#EF4444',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: SPACING.lg,
   },
   errorIconText: {
-    color: COLORS.danger,
-    fontSize: 32,
+    color: '#EF4444',
+    fontSize: 28,
     fontWeight: '800',
   },
   errorTitle: {
-    color: '#FCA5A5',
-    fontSize: TYPOGRAPHY.sizes.lg,
+    color: '#F87171',
+    fontSize: 18,
     fontWeight: '800',
     letterSpacing: 0.8,
     marginBottom: SPACING.sm,
   },
   errorDescription: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.sizes.sm,
+    color: '#CBD5E1',
+    fontSize: 13,
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: SPACING.xl,
-    maxWidth: 320,
+    maxWidth: 300,
   },
   errorButtons: {
     width: '100%',
-    maxWidth: 260,
+    maxWidth: 240,
   },
   retryBtn: {
     marginBottom: SPACING.md,
   },
   errorSupportText: {
-    color: COLORS.textMuted,
+    color: '#64748B',
     fontSize: 11,
     textAlign: 'center',
     marginTop: SPACING.lg,
-    maxWidth: 300,
+    maxWidth: 280,
     lineHeight: 16,
   },
 });

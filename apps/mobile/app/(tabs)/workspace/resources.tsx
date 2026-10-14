@@ -6,15 +6,15 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
+  TextInput,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Header } from '../../../src/components/common/Header';
-import { DemoBanner } from '../../../src/components/common/DemoBanner';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { ResourceCard } from '../../../src/components/resources/ResourceCard';
 import { Button } from '../../../src/components/common/Button';
-import { InputField } from '../../../src/components/common/InputField';
-import { COLORS, SPACING, RADII, TYPOGRAPHY, SHADOWS } from '../../../src/theme';
+import { MOBILE_THEME, SPACING, RADII, SHADOWS } from '../../../src/theme';
 import { useAuth } from '../../../src/context/AuthContext';
 import {
   DEMO_RESOURCES,
@@ -23,12 +23,14 @@ import {
   validateResourceUpload,
 } from '@zenith/shared';
 
+type TypeFilter = 'All' | 'Documents' | 'Links' | 'Media';
 type AccessFilter = 'all' | 'showcase_public' | 'internal_only';
 
 export default function ResourcesScreen() {
+  const router = useRouter();
   const { user } = useAuth();
   const [resources, setResources] = useState<ResourceItem[]>(DEMO_RESOURCES);
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [activeType, setActiveType] = useState<TypeFilter>('All');
   const [accessFilter, setAccessFilter] = useState<AccessFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -43,18 +45,30 @@ export default function ResourcesScreen() {
   // Preview Modal State
   const [previewItem, setPreviewItem] = useState<ResourceItem | null>(null);
 
-  const categories = ['All', 'Aptitude', 'Technical', 'HR & Soft Skills'];
+  const typeTabs: TypeFilter[] = ['All', 'Documents', 'Links', 'Media'];
 
   const filtered = resources.filter((r) => {
-    const matchesCategory =
-      selectedCategory === 'All' || r.category === selectedCategory;
+    // Type Filter
+    let matchesType = true;
+    if (activeType === 'Documents') {
+      matchesType = r.mime_type.includes('pdf') || r.mime_type.includes('doc');
+    } else if (activeType === 'Links') {
+      matchesType = !r.mime_type.includes('pdf') && !r.mime_type.includes('zip');
+    } else if (activeType === 'Media') {
+      matchesType = r.mime_type.includes('zip') || r.mime_type.includes('image');
+    }
+
+    // Access Filter
     const matchesAccess =
       accessFilter === 'all' || r.access_level === accessFilter;
+
+    // Search Query
     const matchesQuery =
       searchQuery.trim().length === 0 ||
       r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.category.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesAccess && matchesQuery;
+
+    return matchesType && matchesAccess && matchesQuery;
   });
 
   const handleOpenDoc = (item: ResourceItem) => {
@@ -63,14 +77,14 @@ export default function ResourcesScreen() {
 
   const handleSimulateDownload = (item: ResourceItem) => {
     setPreviewItem(null);
-    setToastMessage(`Simulated Secure S3 Retrieval: "${item.title}" (${(item.file_size / (1024 * 1024)).toFixed(1)} MB) downloaded.`);
+    setToastMessage(`Downloaded "${item.title}" (${(item.file_size / (1024 * 1024)).toFixed(1)} MB).`);
     setTimeout(() => setToastMessage(null), 3500);
   };
 
   const handleSaveUpload = () => {
     const validation = validateResourceUpload({
       title: newTitle,
-      size: 2500000, // 2.5 MB simulated
+      size: 2500000,
       mimeType: 'application/pdf',
     });
 
@@ -106,47 +120,78 @@ export default function ResourcesScreen() {
 
   return (
     <View style={styles.screen}>
-      <Header title="RESOURCES" subtitle="Curriculum Materials & Guides" showBack />
-      <DemoBanner />
+      {/* Header bar matching blueprint */}
+      <View style={styles.headerBar}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="arrow-back" size={22} color={MOBILE_THEME.navyHeader} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Resources</Text>
+        <TouchableOpacity
+          style={styles.addIconBtn}
+          onPress={() => setUploadModalVisible(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Add resource"
+        >
+          <Ionicons name="add" size={24} color={MOBILE_THEME.navyHeader} />
+        </TouchableOpacity>
+      </View>
 
       {toastMessage ? (
         <View style={styles.toastBox}>
-          <Text style={styles.toastText}>ℹ {toastMessage}</Text>
+          <Ionicons name="checkmark-circle" size={16} color="#16A34A" style={{ marginRight: 6 }} />
+          <Text style={styles.toastText}>{toastMessage}</Text>
         </View>
       ) : null}
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Storage Architecture Overview */}
-        <View style={styles.storageCard}>
-          <Text style={styles.storagePre}>SUPABASE STORAGE ARCHITECTURE</Text>
-          <Text style={styles.storageTitle}>Private Documents & Public Showcase</Text>
-          <Text style={styles.storageDesc}>
-            Internal study sheets are locked within private S3 storage with RLS enforcement. Assets flagged as 'Showcase Public' are authorized for public evaluators.
-          </Text>
-          <Button
-            title="UPLOAD NEW ASSET ⬆"
-            onPress={() => setUploadModalVisible(true)}
-            variant="primary"
-            size="sm"
-            style={styles.uploadBtn}
+        {/* Search Bar matching Blueprint Screen 8 */}
+        <View style={styles.searchContainer}>
+          <Ionicons name="search-outline" size={18} color="#94A3B8" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search resources..."
+            placeholderTextColor="#94A3B8"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            clearButtonMode="while-editing"
           />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Ionicons name="close-circle" size={18} color="#94A3B8" />
+            </TouchableOpacity>
+          )}
         </View>
 
-        {/* Search Bar */}
-        <InputField
-          label="SEARCH CURRICULUM ASSETS"
-          placeholder="Filter by title, formula sheet, or topic..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+        {/* Filter Chips matching Blueprint Screen 8 */}
+        <View style={styles.filterChipsRow}>
+          {typeTabs.map((tab) => {
+            const isActive = activeType === tab;
+            return (
+              <TouchableOpacity
+                key={tab}
+                style={[styles.filterChip, isActive && styles.filterChipActive]}
+                onPress={() => setActiveType(tab)}
+              >
+                <Text style={[styles.filterChipText, isActive && styles.filterChipTextActive]}>
+                  {tab}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
 
-        {/* Access Tier Filter Tabs */}
+        {/* Access Tier Secondary Filter */}
         <View style={styles.accessRow}>
           {(
             [
-              { key: 'all', label: 'ALL ACCESS' },
-              { key: 'showcase_public', label: '★ SHOWCASE PUBLIC' },
-              { key: 'internal_only', label: '🔒 INTERNAL ONLY' },
+              { key: 'all', label: 'All Access' },
+              { key: 'showcase_public', label: '★ Showcase Public' },
+              { key: 'internal_only', label: '🔒 Internal Only' },
             ] as const
           ).map((tier) => (
             <TouchableOpacity
@@ -169,39 +214,21 @@ export default function ResourcesScreen() {
           ))}
         </View>
 
-        {/* Category Filters */}
-        <View style={styles.categoriesRow}>
-          {categories.map((cat) => (
-            <TouchableOpacity
-              key={cat}
-              style={[
-                styles.categoryChip,
-                selectedCategory === cat && styles.categoryChipActive,
-              ]}
-              onPress={() => setSelectedCategory(cat)}
-            >
-              <Text
-                style={[
-                  styles.categoryText,
-                  selectedCategory === cat && styles.categoryTextActive,
-                ]}
-              >
-                {cat}
-              </Text>
-            </TouchableOpacity>
-          ))}
+        {/* Section Heading */}
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionHeaderTitle}>
+            {activeType.toUpperCase()} ({filtered.length})
+          </Text>
+          <Text style={styles.storageNote}>Supabase S3 RLS Protected</Text>
         </View>
 
-        {/* Resources List */}
-        <Text style={styles.sectionTitle}>
-          DOCUMENTS ({filtered.length} AVAILABLE)
-        </Text>
-
+        {/* List of Resource Cards */}
         {filtered.length === 0 ? (
           <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>No Matching Documents</Text>
+            <Ionicons name="folder-open-outline" size={44} color="#94A3B8" style={{ marginBottom: 8 }} />
+            <Text style={styles.emptyTitle}>No Resources Found</Text>
             <Text style={styles.emptyDesc}>
-              Try adjusting your search query or selecting a different access tier filter.
+              Try adjusting your search query or switching filter tabs.
             </Text>
           </View>
         ) : (
@@ -221,7 +248,9 @@ export default function ResourcesScreen() {
           <View style={styles.modalOverlay}>
             <View style={styles.previewSheet}>
               <View style={styles.previewHeader}>
-                <Text style={styles.previewIcon}>📄</Text>
+                <View style={styles.previewIconBox}>
+                  <Ionicons name="document-text" size={24} color={MOBILE_THEME.navyHeader} />
+                </View>
                 <View style={{ flex: 1, marginLeft: SPACING.sm }}>
                   <Text style={styles.previewTitle}>{previewItem.title}</Text>
                   <Text style={styles.previewSub}>
@@ -229,7 +258,7 @@ export default function ResourcesScreen() {
                   </Text>
                 </View>
                 <TouchableOpacity onPress={() => setPreviewItem(null)}>
-                  <Text style={styles.modalCloseText}>✕</Text>
+                  <Ionicons name="close" size={22} color="#64748B" />
                 </TouchableOpacity>
               </View>
 
@@ -250,10 +279,6 @@ export default function ResourcesScreen() {
                   <Text style={styles.metaLabel}>CONTRIBUTOR:</Text>
                   <Text style={styles.metaValue}>{previewItem.uploader_name}</Text>
                 </View>
-                <View style={styles.metaRow}>
-                  <Text style={styles.metaLabel}>STORAGE PATH:</Text>
-                  <Text style={styles.metaValue}>{previewItem.file_path}</Text>
-                </View>
               </View>
 
               <View style={styles.previewNoticeBox}>
@@ -271,7 +296,7 @@ export default function ResourcesScreen() {
                   style={{ flex: 1, marginRight: SPACING.sm }}
                 />
                 <Button
-                  title="DOWNLOAD / OPEN FILE 📥"
+                  title="DOWNLOAD / OPEN 📥"
                   onPress={() => handleSimulateDownload(previewItem)}
                   variant="primary"
                   size="md"
@@ -291,36 +316,38 @@ export default function ResourcesScreen() {
         >
           <View style={styles.uploadSheet}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>UPLOAD NEW LEARNING ASSET</Text>
+              <Text style={styles.modalTitle}>Upload Resource</Text>
               <TouchableOpacity onPress={() => setUploadModalVisible(false)}>
-                <Text style={styles.modalCloseText}>✕</Text>
+                <Ionicons name="close" size={22} color="#64748B" />
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
-              <InputField
-                label="DOCUMENT TITLE"
+              <Text style={styles.formLabel}>DOCUMENT TITLE</Text>
+              <TextInput
+                style={styles.formInput}
                 placeholder="e.g. Dynamic Programming Cheat Sheet"
+                placeholderTextColor="#94A3B8"
                 value={newTitle}
                 onChangeText={setNewTitle}
-                error={uploadError}
               />
+              {uploadError && <Text style={styles.errorText}>{uploadError}</Text>}
 
-              <Text style={styles.formLabel}>CURRICULUM CATEGORY</Text>
-              <View style={styles.categoriesRow}>
+              <Text style={styles.formLabel}>CATEGORY</Text>
+              <View style={styles.categoryPickerRow}>
                 {['Aptitude', 'Technical', 'HR & Soft Skills'].map((c) => (
                   <TouchableOpacity
                     key={c}
                     style={[
-                      styles.categoryChip,
-                      newCategory === c && styles.categoryChipActive,
+                      styles.categoryOption,
+                      newCategory === c && styles.categoryOptionActive,
                     ]}
                     onPress={() => setNewCategory(c)}
                   >
                     <Text
                       style={[
-                        styles.categoryText,
-                        newCategory === c && styles.categoryTextActive,
+                        styles.categoryOptionText,
+                        newCategory === c && styles.categoryOptionTextActive,
                       ]}
                     >
                       {c}
@@ -329,19 +356,19 @@ export default function ResourcesScreen() {
                 ))}
               </View>
 
-              <Text style={styles.formLabel}>ACCESS LEVEL / POLICY</Text>
-              <View style={styles.accessRow}>
+              <Text style={styles.formLabel}>ACCESS LEVEL</Text>
+              <View style={styles.categoryPickerRow}>
                 <TouchableOpacity
                   style={[
-                    styles.accessChip,
-                    newAccess === 'showcase_public' && styles.accessChipActive,
+                    styles.categoryOption,
+                    newAccess === 'showcase_public' && styles.categoryOptionActive,
                   ]}
                   onPress={() => setNewAccess('showcase_public')}
                 >
                   <Text
                     style={[
-                      styles.accessText,
-                      newAccess === 'showcase_public' && styles.accessTextActive,
+                      styles.categoryOptionText,
+                      newAccess === 'showcase_public' && styles.categoryOptionTextActive,
                     ]}
                   >
                     ★ Showcase Public
@@ -350,15 +377,15 @@ export default function ResourcesScreen() {
 
                 <TouchableOpacity
                   style={[
-                    styles.accessChip,
-                    newAccess === 'internal_only' && styles.accessChipActive,
+                    styles.categoryOption,
+                    newAccess === 'internal_only' && styles.categoryOptionActive,
                   ]}
                   onPress={() => setNewAccess('internal_only')}
                 >
                   <Text
                     style={[
-                      styles.accessText,
-                      newAccess === 'internal_only' && styles.accessTextActive,
+                      styles.categoryOptionText,
+                      newAccess === 'internal_only' && styles.categoryOptionTextActive,
                     ]}
                   >
                     🔒 Internal Only
@@ -367,8 +394,8 @@ export default function ResourcesScreen() {
               </View>
 
               <View style={styles.simulatedFilePick}>
-                <Text style={styles.simFileIcon}>📎</Text>
-                <Text style={styles.simFileName}>simulated_document_payload.pdf</Text>
+                <Ionicons name="document-attach" size={28} color={MOBILE_THEME.skyBlue} />
+                <Text style={styles.simFileName}>simulated_curriculum_payload.pdf</Text>
                 <Text style={styles.simFileSize}>2.5 MB • application/pdf</Text>
               </View>
             </ScrollView>
@@ -384,7 +411,7 @@ export default function ResourcesScreen() {
               <Button
                 title="CONFIRM UPLOAD"
                 onPress={handleSaveUpload}
-                variant="gold"
+                variant="primary"
                 size="md"
                 style={{ flex: 1.5 }}
               />
@@ -399,148 +426,179 @@ export default function ResourcesScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: COLORS.backgroundDeep,
+    backgroundColor: MOBILE_THEME.bgLight,
+  },
+  headerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.lg,
+    paddingTop: Platform.OS === 'ios' ? 52 : 36,
+    paddingBottom: SPACING.md,
+    backgroundColor: MOBILE_THEME.surfaceWhite,
+    borderBottomWidth: 1,
+    borderBottomColor: MOBILE_THEME.borderLight,
+  },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: RADII.full,
+    backgroundColor: MOBILE_THEME.bgLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: MOBILE_THEME.navyHeader,
+  },
+  addIconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: RADII.full,
+    backgroundColor: MOBILE_THEME.bgSoftBlue,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  toastBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    borderBottomWidth: 1,
+    borderBottomColor: '#BBF7D0',
+    paddingVertical: 10,
+    paddingHorizontal: SPACING.lg,
+  },
+  toastText: {
+    color: '#15803D',
+    fontSize: 12,
+    fontWeight: '600',
   },
   scroll: {
     padding: SPACING.lg,
     paddingBottom: SPACING['5xl'],
   },
-  toastBox: {
-    backgroundColor: 'rgba(56, 189, 248, 0.15)',
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.info,
-    paddingVertical: SPACING.xs + 2,
-    paddingHorizontal: SPACING.md,
+  searchContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-  },
-  toastText: {
-    color: COLORS.brandCyanLight,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  storageCard: {
-    backgroundColor: COLORS.surfaceCard,
-    borderRadius: RADII.xl,
-    padding: SPACING.lg,
+    backgroundColor: MOBILE_THEME.surfaceWhite,
+    borderRadius: RADII.full,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: Platform.OS === 'ios' ? 10 : 8,
     borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-    marginBottom: SPACING.lg,
+    borderColor: MOBILE_THEME.borderLight,
+    marginBottom: SPACING.md,
     ...SHADOWS.card,
   },
-  storagePre: {
-    color: COLORS.brandCyanLight,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
+  searchIcon: {
+    marginRight: 8,
   },
-  storageTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.md,
-    fontWeight: '800',
-    marginTop: 2,
-    marginBottom: SPACING.xs,
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: MOBILE_THEME.navyHeader,
   },
-  storageDesc: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.sizes.xs,
-    lineHeight: 18,
+  filterChipsRow: {
+    flexDirection: 'row',
     marginBottom: SPACING.md,
   },
-  uploadBtn: {
-    alignSelf: 'flex-start',
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: RADII.full,
+    backgroundColor: MOBILE_THEME.surfaceWhite,
+    borderWidth: 1,
+    borderColor: MOBILE_THEME.borderLight,
+    marginRight: 8,
+  },
+  filterChipActive: {
+    backgroundColor: MOBILE_THEME.navyHeader,
+    borderColor: MOBILE_THEME.navyHeader,
+  },
+  filterChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: MOBILE_THEME.textSecondary,
+  },
+  filterChipTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   accessRow: {
     flexDirection: 'row',
     marginBottom: SPACING.md,
   },
   accessChip: {
-    backgroundColor: COLORS.surfaceCard,
-    paddingHorizontal: SPACING.sm + 2,
-    paddingVertical: SPACING.xs + 2,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: RADII.md,
+    backgroundColor: MOBILE_THEME.surfaceWhite,
     borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-    marginRight: SPACING.xs,
+    borderColor: MOBILE_THEME.borderLight,
+    marginRight: 8,
   },
   accessChipActive: {
-    backgroundColor: COLORS.accentGoldSoft,
-    borderColor: COLORS.accentGold,
+    backgroundColor: MOBILE_THEME.bgSoftBlue,
+    borderColor: MOBILE_THEME.skyBlue,
   },
   accessText: {
-    color: COLORS.textMuted,
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  accessTextActive: {
-    color: COLORS.accentGoldBright,
-  },
-  categoriesRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: SPACING.lg,
-  },
-  categoryChip: {
-    backgroundColor: COLORS.surfaceCard,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs + 2,
-    borderRadius: RADII.full,
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-    marginRight: SPACING.xs,
-    marginBottom: SPACING.xs,
-  },
-  categoryChipActive: {
-    backgroundColor: COLORS.brandCyanSoft,
-    borderColor: COLORS.brandCyan,
-  },
-  categoryText: {
-    color: COLORS.textMuted,
     fontSize: 11,
     fontWeight: '600',
+    color: MOBILE_THEME.textMuted,
   },
-  categoryTextActive: {
-    color: COLORS.brandCyanLight,
+  accessTextActive: {
+    color: MOBILE_THEME.skyBlue,
     fontWeight: '700',
   },
-  sectionTitle: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.sizes.xs,
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.sm + 2,
+    marginTop: 4,
+  },
+  sectionHeaderTitle: {
+    fontSize: 11,
     fontWeight: '800',
     letterSpacing: 0.8,
-    marginBottom: SPACING.sm,
+    color: MOBILE_THEME.textSecondary,
+  },
+  storageNote: {
+    fontSize: 10,
+    color: '#94A3B8',
+    fontWeight: '500',
   },
   emptyCard: {
-    backgroundColor: COLORS.surfaceCard,
+    backgroundColor: MOBILE_THEME.surfaceWhite,
     borderRadius: RADII.xl,
     padding: SPACING.xl,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
+    borderColor: MOBILE_THEME.borderLight,
+    marginTop: SPACING.md,
   },
   emptyTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.sm,
+    fontSize: 14,
     fontWeight: '700',
-    marginBottom: SPACING.xs,
+    color: MOBILE_THEME.navyHeader,
   },
   emptyDesc: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.sizes.xs,
+    fontSize: 12,
+    color: MOBILE_THEME.textSecondary,
     textAlign: 'center',
-    lineHeight: 18,
+    marginTop: 4,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(5, 11, 24, 0.85)',
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
     justifyContent: 'center',
     padding: SPACING.lg,
   },
   previewSheet: {
-    backgroundColor: COLORS.surfaceCard,
+    backgroundColor: MOBILE_THEME.surfaceWhite,
     borderRadius: RADII['2xl'],
     padding: SPACING.lg,
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
+    ...SHADOWS.cardHover,
   },
   previewHeader: {
     flexDirection: 'row',
@@ -548,65 +606,70 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     paddingBottom: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(30, 51, 104, 0.4)',
+    borderBottomColor: MOBILE_THEME.borderLight,
   },
-  previewIcon: {
-    fontSize: 24,
+  previewIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: RADII.lg,
+    backgroundColor: MOBILE_THEME.bgSoftBlue,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   previewTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.sm + 1,
-    fontWeight: '800',
+    fontSize: 14,
+    fontWeight: '700',
+    color: MOBILE_THEME.navyHeader,
   },
   previewSub: {
-    color: COLORS.textMuted,
-    fontSize: 10,
+    fontSize: 11,
+    color: MOBILE_THEME.textSecondary,
     marginTop: 2,
   },
   previewMetaBox: {
-    backgroundColor: COLORS.surfaceElevated,
-    borderRadius: RADII.md,
-    padding: SPACING.sm + 2,
+    backgroundColor: MOBILE_THEME.bgLight,
+    borderRadius: RADII.lg,
+    padding: SPACING.md,
     marginBottom: SPACING.md,
   },
   metaRow: {
     marginBottom: SPACING.xs,
   },
   metaLabel: {
-    color: COLORS.brandCyanLight,
     fontSize: 9,
     fontWeight: '800',
     letterSpacing: 0.8,
+    color: MOBILE_THEME.textMuted,
   },
   metaValue: {
-    color: COLORS.textSecondary,
-    fontSize: 11,
+    fontSize: 12,
+    fontWeight: '600',
+    color: MOBILE_THEME.navyHeader,
     marginTop: 1,
   },
   previewNoticeBox: {
-    backgroundColor: 'rgba(6, 182, 212, 0.08)',
-    borderRadius: RADII.sm,
-    padding: SPACING.sm,
-    marginBottom: SPACING.md,
+    backgroundColor: '#EFF6FF',
+    borderRadius: RADII.md,
+    padding: SPACING.sm + 2,
+    marginBottom: SPACING.lg,
     borderWidth: 1,
-    borderColor: 'rgba(6, 182, 212, 0.25)',
+    borderColor: '#BFDBFE',
   },
   previewNoticeText: {
-    color: COLORS.brandCyanLight,
-    fontSize: 10,
-    lineHeight: 15,
+    fontSize: 11,
+    lineHeight: 16,
+    color: '#1E40AF',
   },
   previewActions: {
     flexDirection: 'row',
   },
   uploadSheet: {
-    backgroundColor: COLORS.surfaceCard,
+    backgroundColor: MOBILE_THEME.surfaceWhite,
     borderTopLeftRadius: RADII['2xl'],
     borderTopRightRadius: RADII['2xl'],
     padding: SPACING.lg,
     maxHeight: '90%',
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
+    marginTop: 'auto',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -615,59 +678,90 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     paddingBottom: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(30, 51, 104, 0.4)',
+    borderBottomColor: MOBILE_THEME.borderLight,
   },
   modalTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.sm,
+    fontSize: 16,
     fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  modalCloseText: {
-    color: COLORS.textMuted,
-    fontSize: 18,
-    padding: SPACING.xs,
+    color: MOBILE_THEME.navyHeader,
   },
   modalBody: {
     marginBottom: SPACING.md,
   },
   formLabel: {
-    color: COLORS.brandCyanLight,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-    marginBottom: SPACING.xs,
-    marginTop: SPACING.xs,
+    fontSize: 11,
+    fontWeight: '700',
+    color: MOBILE_THEME.navyHeader,
+    marginTop: SPACING.sm,
+    marginBottom: 6,
+  },
+  formInput: {
+    backgroundColor: MOBILE_THEME.bgLight,
+    borderRadius: RADII.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: MOBILE_THEME.borderLight,
+    fontSize: 13,
+    color: MOBILE_THEME.navyHeader,
+  },
+  errorText: {
+    color: '#DC2626',
+    fontSize: 11,
+    marginTop: 4,
+  },
+  categoryPickerRow: {
+    flexDirection: 'row',
+    marginBottom: SPACING.sm,
+  },
+  categoryOption: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: RADII.md,
+    backgroundColor: MOBILE_THEME.bgLight,
+    borderWidth: 1,
+    borderColor: MOBILE_THEME.borderLight,
+    marginRight: 6,
+  },
+  categoryOptionActive: {
+    backgroundColor: MOBILE_THEME.bgSoftBlue,
+    borderColor: MOBILE_THEME.skyBlue,
+  },
+  categoryOptionText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: MOBILE_THEME.textSecondary,
+  },
+  categoryOptionTextActive: {
+    color: MOBILE_THEME.skyBlue,
+    fontWeight: '700',
   },
   simulatedFilePick: {
-    backgroundColor: COLORS.surfaceElevated,
-    borderRadius: RADII.md,
+    backgroundColor: MOBILE_THEME.bgLight,
+    borderRadius: RADII.lg,
     padding: SPACING.md,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(6, 182, 212, 0.3)',
+    borderColor: MOBILE_THEME.skyBlue,
     borderStyle: 'dashed',
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.sm,
-  },
-  simFileIcon: {
-    fontSize: 24,
-    marginBottom: 4,
+    marginTop: SPACING.md,
   },
   simFileName: {
-    color: COLORS.brandCyanLight,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
+    color: MOBILE_THEME.navyHeader,
+    marginTop: 4,
   },
   simFileSize: {
-    color: COLORS.textMuted,
     fontSize: 10,
+    color: MOBILE_THEME.textMuted,
     marginTop: 2,
   },
   modalFooter: {
     flexDirection: 'row',
-    paddingTop: SPACING.sm,
+    paddingTop: SPACING.md,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(30, 51, 104, 0.4)',
+    borderTopColor: MOBILE_THEME.borderLight,
   },
 });

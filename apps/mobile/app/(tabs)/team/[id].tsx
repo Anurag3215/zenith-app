@@ -1,238 +1,165 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import { COLORS, SPACING, RADII, TYPOGRAPHY, SHADOWS } from '../../../src/theme';
-import { Header } from '../../../src/components/common/Header';
-import { DemoBanner } from '../../../src/components/common/DemoBanner';
-import { Badge } from '../../../src/components/common/Badge';
-import { Card } from '../../../src/components/common/Card';
-import { Button } from '../../../src/components/common/Button';
-import { InputField } from '../../../src/components/common/InputField';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+} from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { MOBILE_THEME } from '../../../src/theme';
 import { useAuth } from '../../../src/context/AuthContext';
 import { DEMO_PROFILES, filterPermittedProfileUpdates } from '@zenith/shared';
 
 export default function MemberProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const member = DEMO_PROFILES.find((p) => p.id === id) || DEMO_PROFILES[0];
   const isSelf = user?.id === member.id;
 
   const [isEditing, setIsEditing] = useState(false);
-  const [bioText, setBioText] = useState(member.bio || '');
-  const [skillsList, setSkillsList] = useState<string[]>(member.skills);
-  const [newSkill, setNewSkill] = useState('');
-  const [linkedinUrl, setLinkedinUrl] = useState(member.linkedin_url || '');
-  const [githubUrl, setGithubUrl] = useState(member.github_url || '');
-  const [phoneVal, setPhoneVal] = useState(member.phone || '');
+  const [bioText, setBioText] = useState(
+    member.bio || 'A short introduction about the team member, their background and goals.'
+  );
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  const handleAddSkill = () => {
-    if (newSkill.trim().length > 0 && !skillsList.includes(newSkill.trim())) {
-      setSkillsList([...skillsList, newSkill.trim()]);
-      setNewSkill('');
-    }
-  };
+  const roleDisplay =
+    member.role === 'team_admin'
+      ? 'Team Admin'
+      : member.role === 'captain'
+      ? 'Captain'
+      : member.role === 'vice_captain'
+      ? 'Vice-Captain'
+      : 'Team Member';
 
-  const handleRemoveSkill = (skillToRemove: string) => {
-    setSkillsList(skillsList.filter((s) => s !== skillToRemove));
-  };
+  const defaultInterests = ['Technology', 'Learning', 'Innovation', 'Cloud Architecture'];
 
-  const handleSaveProfile = () => {
-    // Enforce strict security whitelist: strip non-permitted fields
-    const { sanitized, strippedFields } = filterPermittedProfileUpdates(
+  const handleSave = () => {
+    const { strippedFields } = filterPermittedProfileUpdates(
       user?.role || 'member',
       user?.id || '',
       member.id,
-      {
-        bio: bioText,
-        skills: skillsList,
-        linkedin_url: linkedinUrl.trim() || null,
-        github_url: githubUrl.trim() || null,
-        phone: phoneVal.trim() || null,
-      }
+      { bio: bioText }
     );
 
     setIsEditing(false);
     if (strippedFields.length > 0) {
-      setFeedback(`Saved. Restricted fields (${strippedFields.join(', ')}) were ignored by RBAC guard.`);
+      setFeedback('Restricted fields were protected by RBAC.');
     } else {
-      setFeedback('Profile credentials updated successfully.');
+      setFeedback('Profile updated successfully.');
     }
-    setTimeout(() => setFeedback(null), 3500);
+    setTimeout(() => setFeedback(null), 3000);
   };
 
   return (
-    <View style={styles.screen}>
-      <Header
-        title="MEMBER PROFILE"
-        subtitle="Team No. 5 Credentials"
-        showBack
-      />
-      <DemoBanner />
+    <View style={[styles.screen, { paddingTop: Math.max(insets.top, 16) }]}>
+      {/* Top Bar matching Screen 5 Reference */}
+      <View style={styles.topBar}>
+        <TouchableOpacity
+          style={styles.backBtn}
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Back to team directory"
+        >
+          <Ionicons name="arrow-back" size={22} color={MOBILE_THEME.navyHeader} />
+          <Text style={styles.topBarName}>{member.full_name}</Text>
+        </TouchableOpacity>
+
+        {isSelf ? (
+          <TouchableOpacity
+            style={styles.editBtn}
+            onPress={() => (isEditing ? handleSave() : setIsEditing(true))}
+            accessibilityRole="button"
+          >
+            <Ionicons
+              name={isEditing ? 'checkmark' : 'create-outline'}
+              size={20}
+              color={MOBILE_THEME.navyHeader}
+            />
+          </TouchableOpacity>
+        ) : null}
+      </View>
+
+      <Text style={styles.topSubtitle}>Eight minds. One vision.</Text>
 
       {feedback ? (
-        <View style={styles.feedbackToast}>
+        <View style={styles.feedbackBanner}>
           <Text style={styles.feedbackText}>✓ {feedback}</Text>
         </View>
       ) : null}
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Profile Header Card */}
-        <Card variant="highlighted" style={styles.profileCard}>
-          <View style={styles.avatarRow}>
-            <View style={styles.avatarCircle}>
-              <Text style={styles.avatarInitials}>
-                {member.full_name.slice(0, 2).toUpperCase()}
-              </Text>
-            </View>
-            <View style={styles.titleCol}>
-              <Text style={styles.fullName}>{member.full_name}</Text>
-              <Text style={styles.emailText}>{member.email}</Text>
-              <View style={styles.roleBadgeRow}>
-                <Badge
-                  label={member.role.replace('_', ' ')}
-                  variant="role"
-                  role={member.role}
-                />
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Large Avatar Placeholder */}
+        <View style={styles.avatarSection}>
+          <View style={styles.largeAvatarCircle}>
+            <Ionicons name="person" size={54} color="#93C5FD" />
+          </View>
+          <Text style={styles.displayName}>{member.full_name}</Text>
+          <Text style={styles.displayRole}>{roleDisplay}</Text>
+        </View>
+
+        {/* Section: Skills */}
+        <View style={styles.sectionBlock}>
+          <Text style={styles.sectionLabel}>Skills</Text>
+          <View style={styles.pillsRow}>
+            {member.skills.map((skill, idx) => (
+              <View key={idx} style={styles.pillChip}>
+                <Text style={styles.pillText}>{skill}</Text>
               </View>
-            </View>
+            ))}
           </View>
+        </View>
 
-          {/* Protected Fields Notice */}
-          <View style={styles.securityLockBox}>
-            <Text style={styles.securityLockText}>
-              🔒 Protected Fields: Role, Email, and Account Status are managed strictly by Team Administration and cannot be altered via self-service forms.
-            </Text>
+        {/* Section: Interests */}
+        <View style={styles.sectionBlock}>
+          <Text style={styles.sectionLabel}>Interests</Text>
+          <View style={styles.pillsRow}>
+            {defaultInterests.map((interest, idx) => (
+              <View key={idx} style={[styles.pillChip, styles.pillChipSky]}>
+                <Text style={styles.pillTextSky}>{interest}</Text>
+              </View>
+            ))}
           </View>
+        </View>
 
-          {isSelf ? (
-            <TouchableOpacity
-              style={styles.editToggleBtn}
-              onPress={() => setIsEditing(!isEditing)}
-              accessibilityRole="button"
-            >
-              <Text style={styles.editToggleText}>
-                {isEditing ? 'CANCEL EDITING ✕' : 'EDIT MY PROFILE ✎'}
-              </Text>
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.readOnlyIndicator}>
-              <Text style={styles.readOnlyText}>READ-ONLY PEER PROFILE VIEW</Text>
-            </View>
-          )}
-        </Card>
-
-        {/* Biography Section */}
-        <Card variant="default" style={styles.sectionCard}>
-          <Text style={styles.sectionHeading}>PROFESSIONAL BIOGRAPHY</Text>
+        {/* Section: About */}
+        <View style={styles.cardBlock}>
+          <Text style={styles.cardBlockTitle}>About</Text>
           {isEditing ? (
-            <InputField
-              label="EDIT BIO"
+            <TextInput
+              style={styles.bioInput}
               value={bioText}
               onChangeText={setBioText}
               multiline
               numberOfLines={4}
             />
           ) : (
-            <Text style={styles.bioBody}>{bioText}</Text>
+            <Text style={styles.cardBlockText}>{bioText}</Text>
           )}
-        </Card>
+        </View>
 
-        {/* Technical Skills & Competencies */}
-        <Card variant="default" style={styles.sectionCard}>
-          <Text style={styles.sectionHeading}>VERIFIED SKILLS & COMPETENCIES</Text>
-          <View style={styles.skillsRow}>
-            {skillsList.map((skill, idx) => (
-              <View key={idx} style={styles.skillChip}>
-                <Text style={styles.skillText}>{skill}</Text>
-                {isEditing ? (
-                  <TouchableOpacity
-                    onPress={() => handleRemoveSkill(skill)}
-                    style={styles.removeSkillBtn}
-                  >
-                    <Text style={styles.removeSkillText}>✕</Text>
-                  </TouchableOpacity>
-                ) : null}
-              </View>
-            ))}
-          </View>
-
-          {isEditing ? (
-            <View style={styles.addSkillBox}>
-              <InputField
-                label="ADD NEW SKILL"
-                placeholder="e.g. Next.js, System Design"
-                value={newSkill}
-                onChangeText={setNewSkill}
-              />
-              <Button
-                title="ADD SKILL CHIP +"
-                onPress={handleAddSkill}
-                variant="secondary"
-                size="sm"
-              />
-            </View>
-          ) : null}
-        </Card>
-
-        {/* Verification & Social Credentials */}
-        <Card variant="default" style={styles.sectionCard}>
-          <Text style={styles.sectionHeading}>CREDENTIAL PLACEHOLDERS & LINKS</Text>
-          {isEditing ? (
-            <>
-              <InputField
-                label="LINKEDIN PROFILE URL"
-                placeholder="https://linkedin.com/in/username"
-                value={linkedinUrl}
-                onChangeText={setLinkedinUrl}
-              />
-              <InputField
-                label="GITHUB PROFILE URL"
-                placeholder="https://github.com/username"
-                value={githubUrl}
-                onChangeText={setGithubUrl}
-              />
-              <InputField
-                label="CONTACT PHONE (INTERNAL)"
-                placeholder="+91 XXXXX XXXXX"
-                value={phoneVal}
-                onChangeText={setPhoneVal}
-              />
-            </>
-          ) : (
-            <>
-              <View style={styles.linkRow}>
-                <Text style={styles.linkLabel}>LINKEDIN:</Text>
-                <Text style={styles.linkPlaceholder}>
-                  {member.linkedin_url || '[Official LinkedIn Profile Pending Verification]'}
-                </Text>
-              </View>
-              <View style={styles.linkRow}>
-                <Text style={styles.linkLabel}>GITHUB:</Text>
-                <Text style={styles.linkPlaceholder}>
-                  {member.github_url || '[Official GitHub Profile Pending Verification]'}
-                </Text>
-              </View>
-              <View style={styles.linkRow}>
-                <Text style={styles.linkLabel}>EMERGENCY PHONE:</Text>
-                <Text style={styles.linkPlaceholder}>
-                  {member.phone || '[Verified Institutional Contact Pending]'}
-                </Text>
-              </View>
-            </>
-          )}
-        </Card>
-
-        {isEditing ? (
-          <Button
-            title="SAVE PROFILE EDITS"
-            onPress={handleSaveProfile}
-            variant="gold"
-            size="lg"
-            style={styles.saveBtn}
-          />
-        ) : null}
+        {/* Section: Role in ZENITH */}
+        <View style={styles.cardBlock}>
+          <Text style={styles.cardBlockTitle}>Role in ZENITH</Text>
+          <Text style={styles.cardBlockText}>
+            {member.role === 'captain'
+              ? 'Lead coordinator responsible for daily scoreboard updates, agile sprints, and strategic peer coaching.'
+              : member.role === 'vice_captain'
+              ? 'Operations co-lead responsible for curriculum pacing, peer mentorship, and authorized score adjustments.'
+              : member.role === 'team_admin'
+              ? 'Institutional administrator overseeing governance, credentials verification, and security allowlists.'
+              : 'Active squad member contributing to competitive algorithmic aptitude, technical problem solving, and team reflections.'}
+          </Text>
+        </View>
       </ScrollView>
     </View>
   );
@@ -241,168 +168,145 @@ export default function MemberProfileScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: COLORS.backgroundDeep,
+    backgroundColor: MOBILE_THEME.bgLight,
   },
-  scroll: {
-    padding: SPACING.lg,
-    paddingBottom: SPACING['5xl'],
-  },
-  feedbackToast: {
-    backgroundColor: COLORS.successSoft,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.success,
-    paddingVertical: SPACING.xs + 2,
-    paddingHorizontal: SPACING.md,
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 8,
   },
-  feedbackText: {
-    color: COLORS.success,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  profileCard: {
-    marginBottom: SPACING.lg,
-  },
-  avatarRow: {
+  backBtn: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
-  avatarCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: RADII.full,
-    backgroundColor: COLORS.surfaceElevated,
-    borderWidth: 2,
-    borderColor: COLORS.brandElectric,
+  topBarName: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: MOBILE_THEME.navyHeader,
+  },
+  topSubtitle: {
+    fontSize: 12,
+    color: '#64748B',
+    paddingHorizontal: 20,
+    marginTop: 2,
+    marginBottom: 8,
+  },
+  editBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: SPACING.lg,
   },
-  avatarInitials: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.xl,
-    fontWeight: '800',
+  feedbackBanner: {
+    backgroundColor: '#ECFDF5',
+    borderColor: '#A7F3D0',
+    borderWidth: 1,
+    padding: 8,
+    marginHorizontal: 20,
+    borderRadius: 8,
   },
-  titleCol: {
-    flex: 1,
-  },
-  fullName: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.md + 2,
-    fontWeight: '800',
-  },
-  emailText: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.sizes.xs,
-    marginTop: 2,
-    marginBottom: SPACING.xs,
-  },
-  roleBadgeRow: {
-    flexDirection: 'row',
-  },
-  editToggleBtn: {
-    marginTop: SPACING.md,
-    paddingTop: SPACING.sm,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(30, 51, 104, 0.4)',
-    alignItems: 'flex-end',
-  },
-  editToggleText: {
-    color: COLORS.brandCyanLight,
+  feedbackText: {
+    color: '#065F46',
     fontSize: 11,
     fontWeight: '700',
-    letterSpacing: 0.5,
+    textAlign: 'center',
   },
-  sectionCard: {
-    marginBottom: SPACING.lg,
+  scroll: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
-  sectionHeading: {
-    color: COLORS.brandCyanLight,
-    fontSize: 10,
+  avatarSection: {
+    alignItems: 'center',
+    marginVertical: 18,
+  },
+  largeAvatarCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: '#E0F2FE',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  displayName: {
+    fontSize: 19,
     fontWeight: '800',
-    letterSpacing: 0.8,
-    marginBottom: SPACING.sm,
+    color: MOBILE_THEME.navyHeader,
   },
-  bioBody: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.sizes.sm,
-    lineHeight: 22,
-    fontStyle: 'italic',
+  displayRole: {
+    fontSize: 13,
+    color: '#64748B',
+    marginTop: 3,
   },
-  skillsRow: {
+  sectionBlock: {
+    marginBottom: 16,
+  },
+  sectionLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: MOBILE_THEME.navyHeader,
+    marginBottom: 8,
+  },
+  pillsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    gap: 8,
   },
-  skillChip: {
-    backgroundColor: COLORS.surfaceElevated,
-    borderRadius: RADII.full,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
-    marginRight: SPACING.sm,
-    marginBottom: SPACING.sm,
+  pillChip: {
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(6, 182, 212, 0.4)',
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
-  skillText: {
-    color: COLORS.brandCyanLight,
-    fontSize: 11,
+  pillText: {
+    fontSize: 12,
     fontWeight: '600',
+    color: '#334155',
   },
-  addSkillBox: {
-    marginTop: SPACING.md,
-    paddingTop: SPACING.md,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(30, 51, 104, 0.4)',
+  pillChipSky: {
+    backgroundColor: '#F0F9FF',
+    borderColor: '#BAE6FD',
   },
-  linkRow: {
-    marginBottom: SPACING.sm,
+  pillTextSky: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#0369A1',
   },
-  linkLabel: {
-    color: COLORS.textPrimary,
-    fontSize: 11,
-    fontWeight: '700',
-    marginBottom: 2,
-  },
-  linkPlaceholder: {
-    color: COLORS.textMuted,
-    fontSize: 11,
-    fontStyle: 'italic',
-  },
-  saveBtn: {
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.xl,
-  },
-  securityLockBox: {
-    backgroundColor: 'rgba(234, 179, 8, 0.08)',
-    borderRadius: RADII.sm,
-    padding: SPACING.sm,
-    marginTop: SPACING.sm,
+  cardBlock: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(234, 179, 8, 0.25)',
+    borderColor: '#E2E8F0',
+    marginBottom: 14,
   },
-  securityLockText: {
-    color: COLORS.accentGoldBright,
-    fontSize: 10,
-    lineHeight: 14,
-  },
-  readOnlyIndicator: {
-    marginTop: SPACING.sm,
-    paddingTop: SPACING.xs,
-    alignItems: 'flex-end',
-  },
-  readOnlyText: {
-    color: COLORS.textMuted,
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  removeSkillBtn: {
-    marginLeft: SPACING.xs,
-    paddingHorizontal: 4,
-  },
-  removeSkillText: {
-    color: COLORS.error,
-    fontSize: 10,
+  cardBlockTitle: {
+    fontSize: 13,
     fontWeight: '800',
+    color: MOBILE_THEME.navyHeader,
+    marginBottom: 6,
+  },
+  cardBlockText: {
+    fontSize: 13,
+    color: '#475569',
+    lineHeight: 19,
+  },
+  bioInput: {
+    fontSize: 13,
+    color: '#0F172A',
+    borderColor: '#0284C7',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 8,
+    backgroundColor: '#F8FAFC',
   },
 });

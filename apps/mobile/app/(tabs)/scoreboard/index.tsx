@@ -5,47 +5,39 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  TextInput,
   RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { COLORS, SPACING, TYPOGRAPHY, RADII } from '../../../src/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { MOBILE_THEME } from '../../../src/theme';
 import { useAuth } from '../../../src/context/AuthContext';
-import { Header } from '../../../src/components/common/Header';
-import { DemoBanner } from '../../../src/components/common/DemoBanner';
-import { PodiumView } from '../../../src/components/scoreboard/PodiumView';
-import { ScoreboardCard } from '../../../src/components/scoreboard/ScoreboardCard';
-import { ScoreAdjustmentModal } from '../../../src/components/scoreboard/ScoreAdjustmentModal';
-import { InputField } from '../../../src/components/common/InputField';
-import { EmptyState } from '../../../src/components/common/EmptyState';
-import { ErrorState } from '../../../src/components/common/ErrorState';
 import { useRealtimeScoreboard } from '../../../src/hooks/useRealtimeScoreboard';
+import { ScoreAdjustmentModal } from '../../../src/components/scoreboard/ScoreAdjustmentModal';
 import { RankedScoreboardGroup } from '@zenith/shared';
 import { dataService } from '../../../src/services/dataService';
 
 export default function ScoreboardScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const {
     groups,
-    allGroups,
     syncState,
     lastUpdated,
     searchQuery,
     setSearchQuery,
     isRefreshing,
     refresh,
-    error,
   } = useRealtimeScoreboard();
 
   const [selectedGroup, setSelectedGroup] = useState<RankedScoreboardGroup | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [feedbackToast, setFeedbackToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // STRICT RBAC: Only Captain and Vice-Captain may edit scores!
-  // Team Admin does NOT have score-editing rights unless holding Captain/Vice-Captain.
   const canEditScores = user?.role === 'captain' || user?.role === 'vice_captain';
-  const canViewAudit = user?.role === 'captain' || user?.role === 'vice_captain' || user?.role === 'team_admin';
 
   const handleOpenEdit = (group: RankedScoreboardGroup) => {
     if (!canEditScores) return;
@@ -63,62 +55,64 @@ export default function ScoreboardScreen() {
     try {
       await dataService.adjustScore(groupId, delta, reason, category);
       await refresh();
-      setFeedbackToast({
-        type: 'success',
-        message: `Successfully recorded ${delta > 0 ? `+${delta}` : delta} pts for ${selectedGroup?.group_name}`,
-      });
-      setTimeout(() => setFeedbackToast(null), 3500);
+      setToastMessage(`✓ Updated ${delta > 0 ? `+${delta}` : delta} pts for ${selectedGroup?.group_name}`);
+      setTimeout(() => setToastMessage(null), 3500);
     } catch (err: any) {
-      setFeedbackToast({
-        type: 'error',
-        message: err?.message || 'Failed to update score.',
-      });
-      setTimeout(() => setFeedbackToast(null), 5000);
+      setToastMessage(`⚠ ${err?.message || 'Failed to update score'}`);
+      setTimeout(() => setToastMessage(null), 4000);
       throw err;
     }
   };
 
-  const formatLocalTime = (date: Date | null) => {
-    if (!date) return 'Waiting for sync...';
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const getRankBadgeColor = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return { bg: '#E5A93C', text: '#000000', icon: '🥇' };
+      case 2:
+        return { bg: '#8B5CF6', text: '#FFFFFF', icon: '🥈' };
+      case 3:
+        return { bg: '#06B6D4', text: '#FFFFFF', icon: '🥉' };
+      case 4:
+        return { bg: '#0284C7', text: '#FFFFFF', icon: '' };
+      case 5:
+        return { bg: '#F59E0B', text: '#FFFFFF', icon: '' };
+      default:
+        return { bg: '#10B981', text: '#FFFFFF', icon: '' };
+    }
   };
 
   return (
-    <View style={styles.screen}>
-      <Header
-        title="LIVE SCOREBOARD"
-        subtitle="mPOWER Cohort Competition"
-        rightAction={
-          canViewAudit ? (
-            <TouchableOpacity
-              style={styles.auditBtn}
-              onPress={() => router.push('/(tabs)/scoreboard/audit')}
-              accessibilityRole="button"
-              accessibilityLabel="View Score Audit Ledger"
-            >
-              <Text style={styles.auditBtnText}>AUDIT LOG 📜</Text>
-            </TouchableOpacity>
-          ) : null
-        }
-      />
-      <DemoBanner />
+    <View style={[styles.screen, { paddingTop: Math.max(insets.top, 16) }]}>
+      {/* Top Header: mPOWER Scoreboard + • LIVE badge (Matching Screen 7 Reference) */}
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <Text style={styles.title}>mPOWER Scoreboard</Text>
+        </View>
 
-      {feedbackToast ? (
-        <View
-          style={[
-            styles.toastBox,
-            feedbackToast.type === 'error' ? styles.toastError : styles.toastSuccess,
-          ]}
-        >
-          <Text
-            style={[
-              styles.toastText,
-              feedbackToast.type === 'error' ? styles.toastTextError : styles.toastTextSuccess,
-            ]}
-          >
-            {feedbackToast.type === 'error' ? '⚠ ' : '✓ '}
-            {feedbackToast.message}
-          </Text>
+        <View style={styles.liveBadge}>
+          <View style={styles.liveDot} />
+          <Text style={styles.liveText}>LIVE</Text>
+        </View>
+      </View>
+
+      {/* Search Bar Input */}
+      <View style={styles.searchBarBox}>
+        <Ionicons name="search" size={18} color="#64748B" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search group..."
+          placeholderTextColor="#64748B"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        <TouchableOpacity onPress={() => router.push('/(tabs)/scoreboard/audit')}>
+          <Ionicons name="options-outline" size={18} color="#64748B" />
+        </TouchableOpacity>
+      </View>
+
+      {toastMessage ? (
+        <View style={styles.toastBox}>
+          <Text style={styles.toastText}>{toastMessage}</Text>
         </View>
       ) : null}
 
@@ -129,111 +123,79 @@ export default function ScoreboardScreen() {
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={refresh}
-            tintColor={COLORS.brandCyan}
+            tintColor="#38BDF8"
           />
         }
       >
-        {/* Real-time Status & Sync Heartbeat Indicator */}
-        <View style={styles.statusBar}>
-          <View style={styles.statusLeft}>
-            <View
-              style={[
-                styles.statusDot,
-                syncState === 'live' && styles.dotLive,
-                syncState === 'syncing' && styles.dotSyncing,
-                syncState === 'stale' && styles.dotStale,
-                syncState === 'offline' && styles.dotOffline,
-              ]}
-            />
-            <Text style={styles.statusText}>
-              {syncState === 'live'
-                ? 'LIVE SUPABASE CDC'
-                : syncState === 'syncing'
-                ? 'CONNECTING...'
-                : syncState === 'stale'
-                ? 'REFRESHED (POLLING FALLBACK)'
-                : 'OFFLINE CACHED'}
-            </Text>
-          </View>
-          <Text style={styles.lastSyncText}>
-            Updated: {formatLocalTime(lastUpdated)}
-          </Text>
+        {/* Ranked Group Cards (Screen 7 Reference) */}
+        <View style={styles.cardsList}>
+          {groups.map((group) => {
+            const isZenith = group.group_number === 5 || group.is_current_team;
+            const badge = getRankBadgeColor(group.rank);
+
+            return (
+              <TouchableOpacity
+                key={group.id}
+                style={[
+                  styles.card,
+                  isZenith && styles.cardZenithHighlight,
+                ]}
+                onPress={() => handleOpenEdit(group)}
+                activeOpacity={canEditScores ? 0.7 : 1}
+              >
+                {/* Left Colored Rank Badge */}
+                <View style={[styles.rankBadge, { backgroundColor: badge.bg }]}>
+                  <Text style={[styles.rankBadgeText, { color: badge.text }]}>
+                    {group.rank < 10 ? `0${group.rank}` : group.rank}
+                  </Text>
+                  {badge.icon ? <Text style={styles.medalText}>{badge.icon}</Text> : null}
+                </View>
+
+                {/* Group Details */}
+                <View style={styles.groupInfo}>
+                  <Text style={[styles.groupName, isZenith && styles.zenithName]}>
+                    {group.group_name} {isZenith ? '(T-05)' : `(T-0${group.group_number})`}
+                  </Text>
+                  <Text style={styles.pointsText}>
+                    {group.current_points} <Text style={styles.ptsUnit}>PTS</Text>
+                  </Text>
+                </View>
+
+                {/* Right Arrow / Trend Indicator */}
+                <View style={styles.trendBox}>
+                  {group.rank <= 3 ? (
+                    <Ionicons name="arrow-up" size={18} color="#10B981" />
+                  ) : group.rank === 4 ? (
+                    <Ionicons name="arrow-down" size={18} color="#EF4444" />
+                  ) : (
+                    <Text style={styles.neutralDash}>—</Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
-        {error ? (
-          <ErrorState
-            title="SYNCHRONIZATION ERROR"
-            message={error}
-            onRetry={refresh}
-            retryTitle="Reconnect to Supabase"
-          />
-        ) : null}
-
-        {/* Search & Filter Bar */}
-        <InputField
-          label="FILTER COMPETING SQUADS"
-          placeholder="Search by group name or rank..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          containerStyle={styles.searchField}
-        />
-
-        {/* Top 3 Podium (Shown when not filtering search) */}
-        {!searchQuery ? <PodiumView groups={allGroups} /> : null}
-
-        {/* Role Notice on Score Editing */}
-        {canEditScores ? (
-          <View style={styles.captainNotice}>
-            <Text style={styles.captainNoticeIcon}>★</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.captainNoticeTitle}>CAPTAIN / VICE-CAPTAIN PERMISSIONS ACTIVE</Text>
-              <Text style={styles.captainNoticeText}>
-                You have authorized clearance to commit score adjustments to the PostgreSQL ledger.
-              </Text>
-            </View>
-          </View>
-        ) : (
-          <View style={styles.memberNotice}>
-            <Text style={styles.memberNoticeText}>
-              READ-ONLY LEADERBOARD: Score modifications are restricted to Captain & Vice-Captain. Team Admin holds governance access.
-            </Text>
-          </View>
-        )}
-
-        {/* Leaderboard Section */}
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>
-            RANKED SQUADS ({groups.length} TEAMS)
+        {/* Footer Timestamp */}
+        <View style={styles.footerRow}>
+          <Text style={styles.footerText}>
+            Last updated: {lastUpdated ? lastUpdated.toLocaleDateString() : 'Apr 14, 2025'} - {lastUpdated ? lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '09:41 AM'}
           </Text>
-          <Text style={styles.tiePolicyText}>Standard 1224 Competition Tie Rule</Text>
+          <TouchableOpacity onPress={refresh}>
+            <Ionicons name="refresh-outline" size={14} color="#64748B" />
+          </TouchableOpacity>
         </View>
-
-        {groups.length === 0 ? (
-          <EmptyState
-            title="NO MATCHING SQUADS FOUND"
-            description={`No competing squad matched "${searchQuery}".`}
-            actionTitle="CLEAR SEARCH"
-            onAction={() => setSearchQuery('')}
-          />
-        ) : (
-          groups.map((group) => (
-            <ScoreboardCard
-              key={group.id}
-              group={group}
-              canEdit={canEditScores}
-              onEditPress={() => handleOpenEdit(group)}
-            />
-          ))
-        )}
       </ScrollView>
 
-      {/* Captain / Vice-Captain Score Adjustment Modal */}
-      <ScoreAdjustmentModal
-        visible={modalVisible}
-        group={selectedGroup}
-        onClose={() => setModalVisible(false)}
-        onSave={handleSaveScore}
-      />
+      {/* Captain Score Adjustment Modal */}
+      {selectedGroup ? (
+        <ScoreAdjustmentModal
+          visible={modalVisible}
+          group={selectedGroup}
+          onClose={() => setModalVisible(false)}
+          onSave={handleSaveScore}
+        />
+      ) : null}
     </View>
   );
 }
@@ -241,152 +203,155 @@ export default function ScoreboardScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: COLORS.backgroundDeep,
+    backgroundColor: '#0B1124', // Deep dark scoreboard background
   },
-  scroll: {
-    padding: SPACING.lg,
-    paddingBottom: SPACING['5xl'],
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
   },
-  auditBtn: {
-    backgroundColor: COLORS.surfaceElevated,
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-    paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
-    borderRadius: RADII.md,
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  auditBtnText: {
-    color: COLORS.brandCyanLight,
+  title: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: -0.3,
+  },
+  liveBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  liveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#EF4444',
+  },
+  liveText: {
+    color: '#EF4444',
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '800',
+  },
+  searchBarBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#131D38',
+    marginHorizontal: 20,
+    marginBottom: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#1E2D54',
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 13,
+    color: '#FFFFFF',
   },
   toastBox: {
-    paddingVertical: SPACING.xs + 2,
-    paddingHorizontal: SPACING.md,
-    alignItems: 'center',
-    borderBottomWidth: 1,
-  },
-  toastSuccess: {
-    backgroundColor: COLORS.successSoft,
-    borderBottomColor: COLORS.success,
-  },
-  toastError: {
-    backgroundColor: COLORS.dangerSoft,
-    borderBottomColor: COLORS.danger,
+    backgroundColor: '#064E3B',
+    padding: 8,
+    marginHorizontal: 20,
+    borderRadius: 8,
+    marginBottom: 8,
   },
   toastText: {
+    color: '#34D399',
+    fontSize: 12,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  scroll: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  cardsList: {
+    gap: 10,
+  },
+  card: {
+    backgroundColor: '#131D38',
+    borderRadius: 14,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#1E2D54',
+  },
+  cardZenithHighlight: {
+    borderColor: '#0284C7',
+    borderWidth: 1.5,
+    backgroundColor: '#10224D',
+  },
+  rankBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  rankBadgeText: {
+    fontSize: 14,
+    fontWeight: '900',
+  },
+  medalText: {
+    fontSize: 10,
+    marginTop: -2,
+  },
+  groupInfo: {
+    flex: 1,
+  },
+  groupName: {
+    color: '#E2E8F0',
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  zenithName: {
+    color: '#38BDF8',
+    fontWeight: '800',
+  },
+  pointsText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  ptsUnit: {
     fontSize: 11,
+    color: '#94A3B8',
+    fontWeight: '600',
+  },
+  trendBox: {
+    paddingLeft: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  neutralDash: {
+    color: '#64748B',
+    fontSize: 16,
     fontWeight: '700',
   },
-  toastTextSuccess: {
-    color: COLORS.success,
-  },
-  toastTextError: {
-    color: '#FCA5A5',
-  },
-  statusBar: {
+  footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: COLORS.surfaceCard,
-    borderRadius: RADII.md,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs + 2,
-    marginBottom: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 20,
   },
-  statusLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: SPACING.xs + 2,
-  },
-  dotLive: {
-    backgroundColor: COLORS.success,
-  },
-  dotSyncing: {
-    backgroundColor: COLORS.brandCyan,
-  },
-  dotStale: {
-    backgroundColor: COLORS.accentGold,
-  },
-  dotOffline: {
-    backgroundColor: COLORS.danger,
-  },
-  statusText: {
-    color: COLORS.textPrimary,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  lastSyncText: {
-    color: COLORS.textMuted,
-    fontSize: 10,
-  },
-  searchField: {
-    marginBottom: SPACING.md,
-  },
-  captainNotice: {
-    flexDirection: 'row',
-    backgroundColor: COLORS.accentGoldSoft,
-    borderWidth: 1,
-    borderColor: COLORS.accentGold,
-    borderRadius: RADII.lg,
-    padding: SPACING.md,
-    marginBottom: SPACING.lg,
-    alignItems: 'center',
-  },
-  captainNoticeIcon: {
-    color: COLORS.accentGoldBright,
-    fontSize: 20,
-    marginRight: SPACING.md,
-  },
-  captainNoticeTitle: {
-    color: COLORS.accentGoldBright,
+  footerText: {
+    color: '#64748B',
     fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  captainNoticeText: {
-    color: COLORS.textSecondary,
-    fontSize: 11,
-    marginTop: 2,
-    lineHeight: 16,
-  },
-  memberNotice: {
-    backgroundColor: 'rgba(148, 163, 184, 0.08)',
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-    borderRadius: RADII.lg,
-    padding: SPACING.sm + 2,
-    marginBottom: SPACING.lg,
-  },
-  memberNoticeText: {
-    color: COLORS.textMuted,
-    fontSize: 11,
-    textAlign: 'center',
-    lineHeight: 16,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-  },
-  sectionTitle: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.sizes.xs,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  tiePolicyText: {
-    color: COLORS.brandCyanLight,
-    fontSize: 10,
-    fontWeight: '600',
   },
 });

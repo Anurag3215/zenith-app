@@ -33,6 +33,28 @@ export default function ShowcaseLandingPage() {
         <div className="wireframe-circle-right" />
 
         <div className="container" style={styles.heroContainer}>
+          {/* Official ZENITH Brand Crest */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+            <div style={{
+              width: '84px',
+              height: '84px',
+              borderRadius: '50%',
+              backgroundColor: '#FFFFFF',
+              border: '2px solid #E5A93C',
+              boxShadow: '0 0 24px rgba(229, 169, 60, 0.4)',
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <img
+                src="/images/zenith-logo.jpg"
+                alt="Official ZENITH Logo"
+                style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' }}
+              />
+            </div>
+          </div>
+
           {/* Top Pill Announcement Badge */}
           <div className="hero-announcement-badge" style={{ marginBottom: '28px' }}>
             <span

@@ -6,16 +6,16 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
+  TextInput,
   KeyboardAvoidingView,
   Platform,
   Alert,
 } from 'react-native';
-import { Header } from '../../../src/components/common/Header';
-import { DemoBanner } from '../../../src/components/common/DemoBanner';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { ReflectionCard } from '../../../src/components/reflections/ReflectionCard';
 import { Button } from '../../../src/components/common/Button';
-import { InputField } from '../../../src/components/common/InputField';
-import { COLORS, SPACING, RADII, TYPOGRAPHY, SHADOWS } from '../../../src/theme';
+import { MOBILE_THEME, SPACING, RADII, SHADOWS } from '../../../src/theme';
 import { useAuth } from '../../../src/context/AuthContext';
 import {
   DEMO_REFLECTIONS,
@@ -26,12 +26,13 @@ import {
   canUserApproveShowcase,
 } from '@zenith/shared';
 
-type FilterTab = 'all' | 'my' | 'showcase';
+type SegmentTab = 'my' | 'shared';
 
 export default function ReflectionsScreen() {
+  const router = useRouter();
   const { user } = useAuth();
   const [reflections, setReflections] = useState<Reflection[]>(DEMO_REFLECTIONS);
-  const [activeTab, setActiveTab] = useState<FilterTab>('all');
+  const [activeSegment, setActiveSegment] = useState<SegmentTab>('my');
   const [modalVisible, setModalVisible] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -133,7 +134,7 @@ export default function ReflectionsScreen() {
       setReflections((prev) => [draftEntry, ...prev]);
     }
 
-    setFeedback('Draft saved locally. Visible exclusively to you in "My Logs & Drafts".');
+    setFeedback('Draft saved locally. Visible exclusively to you in "My Reflections".');
     setTimeout(() => setFeedback(null), 3500);
     resetFormAndClose();
   };
@@ -169,7 +170,7 @@ export default function ReflectionsScreen() {
             : r
         )
       );
-      setFeedback('Reflection updated and published to workspace.');
+      setFeedback('Reflection updated and shared.');
     } else {
       const newEntry: Reflection = {
         id: `refl-${Date.now()}`,
@@ -215,7 +216,7 @@ export default function ReflectionsScreen() {
 
   const handleToggleApproval = (id: string) => {
     if (!canApprove) {
-      setFeedback('Authority Check: Showcase endorsement is reserved for Captain, Vice-Captain & Admin.');
+      setFeedback('Authority Check: Showcase endorsement is reserved for Captains & Admins.');
       setTimeout(() => setFeedback(null), 3000);
       return;
     }
@@ -226,8 +227,8 @@ export default function ReflectionsScreen() {
           const nextState = !r.is_approved_for_showcase;
           setFeedback(
             nextState
-              ? `Reflection by ${r.member_name} approved for Evaluator Showcase ★`
-              : `Reflection by ${r.member_name} unpublished from Showcase`
+              ? `Reflection by ${r.member_name} approved for Showcase ★`
+              : `Reflection unfeatured from Showcase`
           );
           setTimeout(() => setFeedback(null), 3000);
           return { ...r, is_approved_for_showcase: nextState };
@@ -237,79 +238,81 @@ export default function ReflectionsScreen() {
     );
   };
 
-  const visibleReflections = filterWorkspaceReflections(reflections, user?.id, activeTab);
+  // Convert SegmentTab to filterWorkspaceReflections parameter
+  const filterParam = activeSegment === 'my' ? 'my' : 'all';
+  const visibleReflections = filterWorkspaceReflections(reflections, user?.id, filterParam);
 
   return (
     <View style={styles.screen}>
-      <Header title="REFLECTIONS" subtitle="Daily Experiential Logs" showBack />
-      <DemoBanner />
+      {/* Header bar matching blueprint */}
+      <View style={styles.headerBar}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
+          <Ionicons name="arrow-back" size={22} color={MOBILE_THEME.navyHeader} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Reflections</Text>
+        <TouchableOpacity
+          style={styles.addIconBtn}
+          onPress={() => {
+            setEditingId(null);
+            setModalVisible(true);
+          }}
+          accessibilityRole="button"
+          accessibilityLabel="New reflection"
+        >
+          <Ionicons name="add" size={24} color={MOBILE_THEME.navyHeader} />
+        </TouchableOpacity>
+      </View>
 
       {feedback ? (
         <View style={styles.feedbackToast}>
-          <Text style={styles.feedbackText}>ℹ {feedback}</Text>
+          <Ionicons name="information-circle" size={16} color={MOBILE_THEME.skyBlue} style={{ marginRight: 6 }} />
+          <Text style={styles.feedbackText}>{feedback}</Text>
         </View>
       ) : null}
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Action Header Card */}
-        <View style={styles.actionCard}>
-          <Text style={styles.actionTitle}>LOG DAILY LEARNINGS</Text>
-          <Text style={styles.actionDesc}>
-            Document core insights, algorithmic patterns, or interview feedback. Captains can endorse high-quality entries for the Evaluator Web Showcase.
+        {/* Segmented Control Switcher matching Blueprint Screen 10 */}
+        <View style={styles.segmentContainer}>
+          <TouchableOpacity
+            style={[styles.segmentBtn, activeSegment === 'my' && styles.segmentBtnActive]}
+            onPress={() => setActiveSegment('my')}
+          >
+            <Text style={[styles.segmentText, activeSegment === 'my' && styles.segmentTextActive]}>
+              My Reflections
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.segmentBtn, activeSegment === 'shared' && styles.segmentBtnActive]}
+            onPress={() => setActiveSegment('shared')}
+          >
+            <Text style={[styles.segmentText, activeSegment === 'shared' && styles.segmentTextActive]}>
+              Shared
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Section Heading */}
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionHeaderTitle}>
+            {activeSegment === 'my' ? 'MY ENTRIES & DRAFTS' : 'TEAM REFLECTIONS'} ({visibleReflections.length})
           </Text>
-          <Button
-            title="LOG NEW REFLECTION +"
-            onPress={() => {
-              setEditingId(null);
-              setModalVisible(true);
-            }}
-            variant="primary"
-            size="md"
-            style={styles.newBtn}
-          />
+          <Text style={styles.badgeNote}>Daily Experiential Logs</Text>
         </View>
 
-        {/* Filter Tabs */}
-        <View style={styles.filterTabsRow}>
-          {(
-            [
-              { key: 'all', label: 'ALL REFLECTIONS' },
-              { key: 'my', label: 'MY LOGS & DRAFTS' },
-              { key: 'showcase', label: 'SHOWCASE APPROVED ★' },
-            ] as const
-          ).map((tab) => (
-            <TouchableOpacity
-              key={tab.key}
-              style={[styles.filterTab, activeTab === tab.key && styles.filterTabActive]}
-              onPress={() => setActiveTab(tab.key)}
-              accessibilityRole="button"
-            >
-              <Text
-                style={[
-                  styles.filterTabText,
-                  activeTab === tab.key && styles.filterTabTextActive,
-                ]}
-              >
-                {tab.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Reflection Feed */}
-        <Text style={styles.sectionTitle}>
-          SHOWING {visibleReflections.length} ENTRIES
-        </Text>
-
+        {/* List of Reflections */}
         {visibleReflections.length === 0 ? (
           <View style={styles.emptyCard}>
+            <Ionicons name="create-outline" size={44} color="#94A3B8" style={{ marginBottom: 8 }} />
             <Text style={styles.emptyTitle}>No Reflections Found</Text>
             <Text style={styles.emptyDesc}>
-              {activeTab === 'my'
-                ? 'You have not authored any reflections or drafts yet. Tap "Log New Reflection +" to begin.'
-                : activeTab === 'showcase'
-                ? 'No reflections have been approved for the Evaluator Web Showcase yet.'
-                : 'No reflections match the current filter.'}
+              {activeSegment === 'my'
+                ? 'You have not authored any reflections yet. Tap "+" in the top right to log your daily insights.'
+                : 'No shared reflections available in the cohort feed yet.'}
             </Text>
           </View>
         ) : (
@@ -335,10 +338,10 @@ export default function ReflectionsScreen() {
           <View style={styles.modalSheet}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
-                {editingId ? 'EDIT DAILY REFLECTION' : 'LOG DAILY REFLECTION'}
+                {editingId ? 'Edit Daily Reflection' : 'New Reflection'}
               </Text>
               <TouchableOpacity onPress={handleRequestClose}>
-                <Text style={styles.modalCloseText}>✕</Text>
+                <Ionicons name="close" size={22} color="#64748B" />
               </TouchableOpacity>
             </View>
 
@@ -353,14 +356,14 @@ export default function ReflectionsScreen() {
                     onPress={() => setDayNumber(d)}
                   >
                     <Text style={[styles.dayChoiceText, dayNumber === d && styles.dayChoiceTextActive]}>
-                      DAY 0{d}
+                      Day 0{d}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </View>
 
               {/* Mood Rating */}
-              <Text style={styles.formLabel}>MASTERY / CONFIDENCE RATING (1-5)</Text>
+              <Text style={styles.formLabel}>CONFIDENCE / MASTERY (1-5)</Text>
               <View style={styles.moodRow}>
                 {([1, 2, 3, 4, 5] as const).map((r) => (
                   <TouchableOpacity
@@ -368,15 +371,20 @@ export default function ReflectionsScreen() {
                     style={[styles.moodBtn, moodRating === r && styles.moodBtnActive]}
                     onPress={() => setMoodRating(r)}
                   >
+                    <Ionicons
+                      name={moodRating >= r ? 'star' : 'star-outline'}
+                      size={18}
+                      color={moodRating >= r ? MOBILE_THEME.brandGoldBright : '#94A3B8'}
+                    />
                     <Text style={[styles.moodBtnText, moodRating === r && styles.moodBtnTextActive]}>
-                      {r} ★
+                      {r}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </View>
 
               {/* Visibility Choice */}
-              <Text style={styles.formLabel}>SHARING & VISIBILITY POLICY</Text>
+              <Text style={styles.formLabel}>VISIBILITY</Text>
               <View style={styles.visibilityRow}>
                 <TouchableOpacity
                   style={[
@@ -385,13 +393,14 @@ export default function ReflectionsScreen() {
                   ]}
                   onPress={() => setVisibility('team')}
                 >
+                  <Ionicons name="people-outline" size={16} color={visibility === 'team' ? MOBILE_THEME.skyBlue : '#64748B'} style={{ marginRight: 6 }} />
                   <Text
                     style={[
                       styles.visibilityBtnText,
                       visibility === 'team' && styles.visibilityBtnTextActive,
                     ]}
                   >
-                    👥 Share with Team 5
+                    Share with Team 5
                   </Text>
                 </TouchableOpacity>
 
@@ -402,39 +411,46 @@ export default function ReflectionsScreen() {
                   ]}
                   onPress={() => setVisibility('private')}
                 >
+                  <Ionicons name="lock-closed-outline" size={16} color={visibility === 'private' ? MOBILE_THEME.skyBlue : '#64748B'} style={{ marginRight: 6 }} />
                   <Text
                     style={[
                       styles.visibilityBtnText,
                       visibility === 'private' && styles.visibilityBtnTextActive,
                     ]}
                   >
-                    🔒 Private Personal Log
+                    Private Log
                   </Text>
                 </TouchableOpacity>
               </View>
 
-              <InputField
-                label="KEY TAKEAWAYS & TECHNICAL PATTERNS"
+              <Text style={styles.formLabel}>KEY TAKEAWAYS & PATTERNS</Text>
+              <TextInput
+                style={[styles.formInput, styles.textArea]}
                 placeholder="What critical principles did you master today? (min 10 characters)"
+                placeholderTextColor="#94A3B8"
                 value={keyTakeaways}
                 onChangeText={setKeyTakeaways}
                 multiline
                 numberOfLines={3}
-                error={error}
               />
+              {error && <Text style={styles.errorText}>{error}</Text>}
 
-              <InputField
-                label="CHALLENGES FACED"
+              <Text style={styles.formLabel}>CHALLENGES ENCOUNTERED</Text>
+              <TextInput
+                style={[styles.formInput, styles.textArea]}
                 placeholder="Where did you get stuck or encounter difficulty?"
+                placeholderTextColor="#94A3B8"
                 value={challenges}
                 onChangeText={setChallenges}
                 multiline
                 numberOfLines={2}
               />
 
-              <InputField
-                label="CORRECTIVE ACTION ITEMS"
+              <Text style={styles.formLabel}>CORRECTIVE ACTION ITEMS</Text>
+              <TextInput
+                style={[styles.formInput, styles.textArea]}
                 placeholder="What will you practice before tomorrow's rounds?"
+                placeholderTextColor="#94A3B8"
                 value={actions}
                 onChangeText={setActions}
                 multiline
@@ -444,15 +460,8 @@ export default function ReflectionsScreen() {
 
             <View style={styles.modalFooter}>
               <Button
-                title="SAVE DRAFT 💾"
+                title="SAVE DRAFT"
                 onPress={handleSaveDraft}
-                variant="secondary"
-                size="md"
-                style={{ flex: 1, marginRight: SPACING.xs }}
-              />
-              <Button
-                title="CANCEL"
-                onPress={handleRequestClose}
                 variant="outline"
                 size="md"
                 style={{ flex: 1, marginRight: SPACING.xs }}
@@ -460,9 +469,9 @@ export default function ReflectionsScreen() {
               <Button
                 title={editingId ? 'UPDATE' : 'SUBMIT'}
                 onPress={handleSubmit}
-                variant="gold"
+                variant="primary"
                 size="md"
-                style={{ flex: 1 }}
+                style={{ flex: 1.5 }}
               />
             </View>
           </View>
@@ -475,118 +484,134 @@ export default function ReflectionsScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: COLORS.backgroundDeep,
+    backgroundColor: MOBILE_THEME.bgLight,
+  },
+  headerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.lg,
+    paddingTop: Platform.OS === 'ios' ? 52 : 36,
+    paddingBottom: SPACING.md,
+    backgroundColor: MOBILE_THEME.surfaceWhite,
+    borderBottomWidth: 1,
+    borderBottomColor: MOBILE_THEME.borderLight,
+  },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: RADII.full,
+    backgroundColor: MOBILE_THEME.bgLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: MOBILE_THEME.navyHeader,
+  },
+  addIconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: RADII.full,
+    backgroundColor: MOBILE_THEME.bgSoftBlue,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  feedbackToast: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: MOBILE_THEME.bgSoftBlue,
+    borderBottomWidth: 1,
+    borderBottomColor: '#BAE6FD',
+    paddingVertical: 10,
+    paddingHorizontal: SPACING.lg,
+  },
+  feedbackText: {
+    color: '#0369A1',
+    fontSize: 12,
+    fontWeight: '600',
   },
   scroll: {
     padding: SPACING.lg,
     paddingBottom: SPACING['5xl'],
   },
-  feedbackToast: {
-    backgroundColor: 'rgba(56, 189, 248, 0.15)',
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.info,
-    paddingVertical: SPACING.xs + 2,
-    paddingHorizontal: SPACING.md,
+  segmentContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#E2E8F0',
+    borderRadius: RADII.full,
+    padding: 3,
+    marginBottom: SPACING.md,
+  },
+  segmentBtn: {
+    flex: 1,
+    paddingVertical: 8,
     alignItems: 'center',
+    borderRadius: RADII.full,
   },
-  feedbackText: {
-    color: COLORS.brandCyanLight,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  actionCard: {
-    backgroundColor: COLORS.surfaceCard,
-    borderRadius: RADII.xl,
-    padding: SPACING.lg,
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-    marginBottom: SPACING.lg,
+  segmentBtnActive: {
+    backgroundColor: MOBILE_THEME.navyHeader,
     ...SHADOWS.card,
   },
-  actionTitle: {
-    color: COLORS.brandCyanLight,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
+  segmentText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: MOBILE_THEME.textSecondary,
   },
-  actionDesc: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.sizes.xs,
-    lineHeight: 18,
-    marginTop: 4,
-    marginBottom: SPACING.md,
-  },
-  newBtn: {
-    alignSelf: 'flex-start',
-  },
-  filterTabsRow: {
-    flexDirection: 'row',
-    marginBottom: SPACING.lg,
-  },
-  filterTab: {
-    flex: 1,
-    backgroundColor: COLORS.surfaceCard,
-    paddingVertical: SPACING.sm,
-    alignItems: 'center',
-    borderRadius: RADII.md,
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-    marginRight: SPACING.xs,
-  },
-  filterTabActive: {
-    backgroundColor: COLORS.brandCyanSoft,
-    borderColor: COLORS.brandCyan,
-  },
-  filterTabText: {
-    color: COLORS.textMuted,
-    fontSize: 10,
+  segmentTextActive: {
+    color: '#FFFFFF',
     fontWeight: '700',
-    letterSpacing: 0.5,
   },
-  filterTabTextActive: {
-    color: COLORS.brandCyanLight,
-    fontWeight: '800',
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.sm + 2,
+    marginTop: 4,
   },
-  sectionTitle: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.sizes.xs,
+  sectionHeaderTitle: {
+    fontSize: 11,
     fontWeight: '800',
     letterSpacing: 0.8,
-    marginBottom: SPACING.md,
+    color: MOBILE_THEME.textSecondary,
+  },
+  badgeNote: {
+    fontSize: 10,
+    color: '#94A3B8',
+    fontWeight: '500',
   },
   emptyCard: {
-    backgroundColor: COLORS.surfaceCard,
+    backgroundColor: MOBILE_THEME.surfaceWhite,
     borderRadius: RADII.xl,
     padding: SPACING.xl,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
+    borderColor: MOBILE_THEME.borderLight,
+    marginTop: SPACING.md,
   },
   emptyTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.sm,
+    fontSize: 14,
     fontWeight: '700',
-    marginBottom: SPACING.xs,
+    color: MOBILE_THEME.navyHeader,
   },
   emptyDesc: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.sizes.xs,
+    fontSize: 12,
+    color: MOBILE_THEME.textSecondary,
     textAlign: 'center',
+    marginTop: 4,
     lineHeight: 18,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(5, 11, 24, 0.85)',
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
     justifyContent: 'flex-end',
   },
   modalSheet: {
-    backgroundColor: COLORS.surfaceCard,
+    backgroundColor: MOBILE_THEME.surfaceWhite,
     borderTopLeftRadius: RADII['2xl'],
     borderTopRightRadius: RADII['2xl'],
     padding: SPACING.lg,
     maxHeight: '90%',
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -595,115 +620,131 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     paddingBottom: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(30, 51, 104, 0.4)',
+    borderBottomColor: MOBILE_THEME.borderLight,
   },
   modalTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.sm,
+    fontSize: 16,
     fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  modalCloseText: {
-    color: COLORS.textMuted,
-    fontSize: 18,
-    padding: SPACING.xs,
+    color: MOBILE_THEME.navyHeader,
   },
   modalBody: {
     marginBottom: SPACING.md,
   },
   formLabel: {
-    color: COLORS.brandCyanLight,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-    marginBottom: SPACING.xs,
-    marginTop: SPACING.xs,
+    fontSize: 11,
+    fontWeight: '700',
+    color: MOBILE_THEME.navyHeader,
+    marginTop: SPACING.sm,
+    marginBottom: 6,
   },
   dayPickerRow: {
     flexDirection: 'row',
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.xs,
   },
   dayChoice: {
     flex: 1,
-    backgroundColor: COLORS.surfaceElevated,
-    paddingVertical: SPACING.xs + 2,
+    backgroundColor: MOBILE_THEME.bgLight,
+    paddingVertical: 8,
     alignItems: 'center',
-    borderRadius: RADII.sm,
+    borderRadius: RADII.md,
     borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-    marginRight: SPACING.xs,
+    borderColor: MOBILE_THEME.borderLight,
+    marginRight: 6,
   },
   dayChoiceActive: {
-    backgroundColor: COLORS.brandCyanSoft,
-    borderColor: COLORS.brandCyan,
+    backgroundColor: MOBILE_THEME.bgSoftBlue,
+    borderColor: MOBILE_THEME.skyBlue,
   },
   dayChoiceText: {
-    color: COLORS.textMuted,
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
+    color: MOBILE_THEME.textSecondary,
   },
   dayChoiceTextActive: {
-    color: COLORS.brandCyanLight,
+    color: MOBILE_THEME.skyBlue,
     fontWeight: '800',
   },
   moodRow: {
     flexDirection: 'row',
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.xs,
   },
   moodBtn: {
     flex: 1,
-    backgroundColor: COLORS.surfaceElevated,
-    paddingVertical: SPACING.xs + 2,
+    flexDirection: 'row',
+    backgroundColor: MOBILE_THEME.bgLight,
+    paddingVertical: 8,
     alignItems: 'center',
-    borderRadius: RADII.sm,
+    justifyContent: 'center',
+    borderRadius: RADII.md,
     borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-    marginRight: SPACING.xs,
+    borderColor: MOBILE_THEME.borderLight,
+    marginRight: 6,
   },
   moodBtnActive: {
-    backgroundColor: COLORS.accentGoldSoft,
-    borderColor: COLORS.accentGold,
+    backgroundColor: '#FEF3C7',
+    borderColor: '#FCD34D',
   },
   moodBtnText: {
-    color: COLORS.textMuted,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
+    color: MOBILE_THEME.textSecondary,
+    marginLeft: 4,
   },
   moodBtnTextActive: {
-    color: COLORS.accentGoldBright,
-    fontWeight: '800',
+    color: '#92400E',
   },
   visibilityRow: {
     flexDirection: 'row',
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
   },
   visibilityBtn: {
     flex: 1,
-    backgroundColor: COLORS.surfaceElevated,
-    paddingVertical: SPACING.xs + 3,
+    flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: RADII.sm,
+    justifyContent: 'center',
+    backgroundColor: MOBILE_THEME.bgLight,
+    paddingVertical: 10,
+    borderRadius: RADII.md,
     borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-    marginRight: SPACING.xs,
+    borderColor: MOBILE_THEME.borderLight,
+    marginRight: 6,
   },
   visibilityBtnActive: {
-    backgroundColor: 'rgba(6, 182, 212, 0.15)',
-    borderColor: COLORS.brandCyan,
+    backgroundColor: MOBILE_THEME.bgSoftBlue,
+    borderColor: MOBILE_THEME.skyBlue,
   },
   visibilityBtnText: {
-    color: COLORS.textMuted,
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '600',
+    color: MOBILE_THEME.textSecondary,
   },
   visibilityBtnTextActive: {
-    color: COLORS.brandCyanLight,
-    fontWeight: '800',
+    color: MOBILE_THEME.skyBlue,
+    fontWeight: '700',
+  },
+  formInput: {
+    backgroundColor: MOBILE_THEME.bgLight,
+    borderRadius: RADII.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: MOBILE_THEME.borderLight,
+    fontSize: 13,
+    color: MOBILE_THEME.navyHeader,
+  },
+  textArea: {
+    minHeight: 64,
+    textAlignVertical: 'top',
+  },
+  errorText: {
+    color: '#DC2626',
+    fontSize: 11,
+    marginTop: 4,
   },
   modalFooter: {
     flexDirection: 'row',
-    paddingTop: SPACING.sm,
+    paddingTop: SPACING.md,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(30, 51, 104, 0.4)',
+    borderTopColor: MOBILE_THEME.borderLight,
   },
 });

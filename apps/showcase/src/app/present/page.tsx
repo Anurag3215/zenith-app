@@ -98,7 +98,27 @@ export default function PresentationModePage() {
         {slide === 1 && (
           <div style={styles.slideContent}>
             <div style={styles.slideCategory}>EXECUTIVE OVERVIEW • SLIDE 01</div>
-            <h1 style={styles.slideHeading}>ZENITH — Team No. 5</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px' }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                backgroundColor: '#FFFFFF',
+                border: '2px solid #E5A93C',
+                overflow: 'hidden',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 0 16px rgba(229, 169, 60, 0.4)',
+              }}>
+                <img
+                  src="/images/zenith-logo.jpg"
+                  alt="ZENITH Logo"
+                  style={{ width: '52px', height: '52px', borderRadius: '50%', objectFit: 'cover' }}
+                />
+              </div>
+              <h1 style={{ ...styles.slideHeading, marginBottom: 0 }}>ZENITH — Team No. 5</h1>
+            </div>
             <p style={styles.slideSubhead}>
               mPOWER Placement Training Program • Evaluator Executive Briefing
             </p>

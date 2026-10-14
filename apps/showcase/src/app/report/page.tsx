@@ -41,11 +41,18 @@ export default function ExecutiveReportPage() {
         {/* Document Header */}
         <div style={styles.docHeader} className="report-card">
           <div style={styles.docTopRow}>
-            <div>
-              <div style={styles.docPre}>EXECUTIVE PLACEMENT DOSSIER</div>
-              <h1 style={styles.docTitle}>ZENITH — Team No. 5</h1>
-              <div style={styles.docSub}>
-                mPOWER Placement Training Program • Official Cohort Progress Report
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <img
+                src="/images/zenith-logo.jpg"
+                alt="ZENITH Logo"
+                style={{ width: '56px', height: '56px', borderRadius: '50%', border: '2px solid #E5A93C', objectFit: 'cover' }}
+              />
+              <div>
+                <div style={styles.docPre}>EXECUTIVE PLACEMENT DOSSIER</div>
+                <h1 style={styles.docTitle}>ZENITH — Team No. 5</h1>
+                <div style={styles.docSub}>
+                  mPOWER Placement Training Program • Official Cohort Progress Report
+                </div>
               </div>
             </div>
             <div style={styles.docBadgeBox}>

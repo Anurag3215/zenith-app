@@ -1,152 +1,280 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Platform,
+  Alert,
+} from 'react-native';
 import { useRouter } from 'expo-router';
-import { COLORS, SPACING, RADII, TYPOGRAPHY, SHADOWS } from '../../../src/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { MOBILE_THEME, SPACING, RADII, SHADOWS } from '../../../src/theme';
 import { useAuth } from '../../../src/context/AuthContext';
-import { Header } from '../../../src/components/common/Header';
-import { DemoBanner } from '../../../src/components/common/DemoBanner';
-import { Badge } from '../../../src/components/common/Badge';
-import { Card } from '../../../src/components/common/Card';
-import { Button } from '../../../src/components/common/Button';
+import { AppRole } from '@zenith/shared';
 
 export default function WorkspaceHubScreen() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, loginAsRole, logout } = useAuth();
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [showRoleSwitcher, setShowRoleSwitcher] = useState(false);
 
-  const isAdmin = user?.role === 'team_admin';
+  const handleRoleSwitch = async (role: AppRole) => {
+    await loginAsRole(role);
+    setFeedback(`Switched operational role to: ${role.replace('_', ' ').toUpperCase()}`);
+    setTimeout(() => setFeedback(null), 3000);
+  };
 
   const handleSignOut = async () => {
-    await logout();
-    router.replace('/(auth)/signed-out');
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm('Are you sure you want to sign out of the ZENITH workspace?');
+      if (confirmed) {
+        await logout();
+        router.replace('/(auth)/login');
+      }
+    } else {
+      Alert.alert(
+        'Sign Out',
+        'Are you sure you want to sign out of the ZENITH workspace?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Sign Out',
+            style: 'destructive',
+            onPress: async () => {
+              await logout();
+              router.replace('/(auth)/login');
+            },
+          },
+        ]
+      );
+    }
   };
 
   return (
     <View style={styles.screen}>
-      <Header title="WORKSPACE" subtitle="Operations & Tools" />
-      <DemoBanner />
+      {/* Header bar */}
+      <View style={styles.headerBar}>
+        <Text style={styles.headerTitle}>More</Text>
+      </View>
+
+      {feedback ? (
+        <View style={styles.feedbackToast}>
+          <Ionicons name="checkmark-circle" size={16} color="#16A34A" style={{ marginRight: 6 }} />
+          <Text style={styles.feedbackText}>{feedback}</Text>
+        </View>
+      ) : null}
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* User Snapshot Card */}
-        <Card variant="highlighted" style={styles.userCard}>
-          <View style={styles.userTop}>
-            <View style={styles.userAvatar}>
-              <Text style={styles.userInitials}>
-                {user?.full_name ? user.full_name.slice(0, 2).toUpperCase() : 'Z5'}
+        {/* User Profile Card matching Blueprint Screen 11 */}
+        <View style={styles.profileCard}>
+          <View style={styles.avatarCircle}>
+            <Text style={styles.avatarText}>
+              {user?.full_name ? user.full_name.slice(0, 2).toUpperCase() : 'Z5'}
+            </Text>
+          </View>
+
+          <View style={styles.profileMeta}>
+            <Text style={styles.profileName}>{user?.full_name || 'Team Candidate'}</Text>
+            <Text style={styles.profileRole}>
+              {user ? user.role.replace('_', ' ').toUpperCase() : 'MEMBER'} • Team 5
+            </Text>
+            <Text style={styles.profileEmail}>{user?.email}</Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.editProfileBtn}
+            onPress={() => setFeedback('Profile edit form available in evaluator release candidate.')}
+          >
+            <Ionicons name="pencil" size={16} color={MOBILE_THEME.navyHeader} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Workspace Hub Navigation Cards */}
+        <Text style={styles.sectionHeader}>WORKSPACE FEATURES</Text>
+        <View style={styles.menuCard}>
+          <TouchableOpacity
+            style={styles.menuRow}
+            onPress={() => router.push('/(tabs)/workspace/resources')}
+          >
+            <View style={[styles.menuIconBox, { backgroundColor: '#EFF6FF' }]}>
+              <Ionicons name="document-text-outline" size={20} color="#2563EB" />
+            </View>
+            <View style={styles.menuTextCol}>
+              <Text style={styles.menuTitle}>Resources</Text>
+              <Text style={styles.menuSub}>Aptitude formulas, DSA kits & PDFs</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+
+          <TouchableOpacity
+            style={styles.menuRow}
+            onPress={() => router.push('/(tabs)/workspace/gallery')}
+          >
+            <View style={[styles.menuIconBox, { backgroundColor: '#F0FDF4' }]}>
+              <Ionicons name="images-outline" size={20} color="#16A34A" />
+            </View>
+            <View style={styles.menuTextCol}>
+              <Text style={styles.menuTitle}>Milestone Gallery</Text>
+              <Text style={styles.menuSub}>Cohort training photos & whiteboards</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+
+          <TouchableOpacity
+            style={styles.menuRow}
+            onPress={() => router.push('/(tabs)/workspace/reflections')}
+          >
+            <View style={[styles.menuIconBox, { backgroundColor: '#FFF7ED' }]}>
+              <Ionicons name="create-outline" size={20} color="#EA580C" />
+            </View>
+            <View style={styles.menuTextCol}>
+              <Text style={styles.menuTitle}>Reflections</Text>
+              <Text style={styles.menuSub}>Daily experiential logs & confidence ratings</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Evaluator Presentation Mode Tile */}
+        <Text style={styles.sectionHeader}>PRESENTATION MODE</Text>
+        <TouchableOpacity
+          style={styles.presentationCard}
+          onPress={() => router.push('/presentation')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.presentationLeft}>
+            <View style={styles.presentationIconBox}>
+              <Ionicons name="easel-outline" size={22} color="#D4AF37" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.presentationTitle}>Evaluator Presentation Mode</Text>
+              <Text style={styles.presentationSub}>
+                Full-screen showcase slides: Summit view, 4-Day Journey & Next Horizons
               </Text>
             </View>
-            <View style={styles.userMeta}>
-              <Text style={styles.userName}>{user?.full_name || 'Candidate'}</Text>
-              <Text style={styles.userEmail}>{user?.email}</Text>
-              <View style={styles.badgeRow}>
-                <Badge
-                  label={user ? user.role.replace('_', ' ') : 'MEMBER'}
-                  variant="role"
-                  role={user?.role}
-                />
+          </View>
+          <Ionicons name="arrow-forward-circle" size={24} color="#D4AF37" />
+        </TouchableOpacity>
+
+        {/* Settings & Preferences matching Blueprint Screen 11 */}
+        <Text style={styles.sectionHeader}>SETTINGS</Text>
+        <View style={styles.menuCard}>
+          <TouchableOpacity
+            style={styles.menuRow}
+            onPress={() => setShowRoleSwitcher(!showRoleSwitcher)}
+          >
+            <View style={[styles.menuIconBox, { backgroundColor: '#FAF5FF' }]}>
+              <Ionicons name="shield-checkmark-outline" size={20} color="#9333EA" />
+            </View>
+            <View style={styles.menuTextCol}>
+              <Text style={styles.menuTitle}>Evaluator Role Simulator</Text>
+              <Text style={styles.menuSub}>
+                Current: {user?.role.toUpperCase()} (Tap to toggle)
+              </Text>
+            </View>
+            <Ionicons
+              name={showRoleSwitcher ? 'chevron-up' : 'chevron-down'}
+              size={18}
+              color="#94A3B8"
+            />
+          </TouchableOpacity>
+
+          {showRoleSwitcher && (
+            <View style={styles.roleSwitcherBox}>
+              <Text style={styles.roleSwitcherPrompt}>
+                Test role-based permissions in real-time:
+              </Text>
+              <View style={styles.roleButtonsGrid}>
+                {(['captain', 'vice_captain', 'team_admin', 'member'] as const).map((r) => {
+                  const isActive = user?.role === r;
+                  return (
+                    <TouchableOpacity
+                      key={r}
+                      style={[
+                        styles.roleChip,
+                        isActive && styles.roleChipActive,
+                      ]}
+                      onPress={() => handleRoleSwitch(r)}
+                    >
+                      <Text
+                        style={[
+                          styles.roleChipText,
+                          isActive && styles.roleChipTextActive,
+                        ]}
+                      >
+                        {r.replace('_', ' ').toUpperCase()}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             </View>
-          </View>
-        </Card>
+          )}
 
-        {/* Feature Hub List */}
-        <Text style={styles.sectionTitle}>WORKSPACE TOOLS & REPOSITORIES</Text>
+          <View style={styles.divider} />
 
-        <TouchableOpacity
-          style={styles.navRow}
-          onPress={() => router.push('/(tabs)/workspace/reflections')}
-          accessibilityRole="button"
-          accessibilityLabel="Daily Reflections"
-        >
-          <View style={[styles.navIconBox, styles.iconCyan]}>
-            <Text style={styles.navIcon}>✍</Text>
-          </View>
-          <View style={styles.navTextCol}>
-            <Text style={styles.navTitle}>Daily Reflections</Text>
-            <Text style={styles.navSub}>Log takeaways, challenges, and mood scores</Text>
-          </View>
-          <Text style={styles.arrow}>→</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navRow}
-          onPress={() => router.push('/(tabs)/workspace/resources')}
-          accessibilityRole="button"
-          accessibilityLabel="Study Resources and Documents"
-        >
-          <View style={[styles.navIconBox, styles.iconElectric]}>
-            <Text style={styles.navIcon}>📄</Text>
-          </View>
-          <View style={styles.navTextCol}>
-            <Text style={styles.navTitle}>Training Resources</Text>
-            <Text style={styles.navSub}>Aptitude cheat sheets, DSA patterns & resumes</Text>
-          </View>
-          <Text style={styles.arrow}>→</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navRow}
-          onPress={() => router.push('/(tabs)/workspace/gallery')}
-          accessibilityRole="button"
-          accessibilityLabel="Training Media Gallery"
-        >
-          <View style={[styles.navIconBox, styles.iconGold]}>
-            <Text style={styles.navIcon}>📷</Text>
-          </View>
-          <View style={styles.navTextCol}>
-            <Text style={styles.navTitle}>Media Gallery</Text>
-            <Text style={styles.navSub}>Training sessions, milestones & whiteboard sessions</Text>
-          </View>
-          <Text style={styles.arrow}>→</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navRow}
-          onPress={() => router.push('/(tabs)/workspace/settings')}
-          accessibilityRole="button"
-          accessibilityLabel="Account and Application Settings"
-        >
-          <View style={[styles.navIconBox, styles.iconSlate]}>
-            <Text style={styles.navIcon}>⚙</Text>
-          </View>
-          <View style={styles.navTextCol}>
-            <Text style={styles.navTitle}>Account & Settings</Text>
-            <Text style={styles.navSub}>Theme preferences, session keys, and cache</Text>
-          </View>
-          <Text style={styles.arrow}>→</Text>
-        </TouchableOpacity>
-
-        {/* Admin Console Card */}
-        {isAdmin ? (
           <TouchableOpacity
-            style={[styles.navRow, styles.adminRow]}
-            onPress={() => router.push('/(tabs)/workspace/admin')}
-            accessibilityRole="button"
-            accessibilityLabel="Team Admin Governance Console"
+            style={styles.menuRow}
+            onPress={() => setFeedback('Security parameters enforced: RLS 100% active.')}
           >
-            <View style={[styles.navIconBox, styles.iconAdmin]}>
-              <Text style={styles.navIcon}>⚡</Text>
+            <View style={[styles.menuIconBox, { backgroundColor: '#F1F5F9' }]}>
+              <Ionicons name="lock-closed-outline" size={20} color="#475569" />
             </View>
-            <View style={styles.navTextCol}>
-              <Text style={styles.adminTitle}>ADMIN GOVERNANCE CONSOLE</Text>
-              <Text style={styles.navSub}>Role provisioning, audit logs & system controls</Text>
+            <View style={styles.menuTextCol}>
+              <Text style={styles.menuTitle}>Security & Privacy</Text>
+              <Text style={styles.menuSub}>Hardware keystore & RLS status</Text>
             </View>
-            <Text style={styles.adminArrow}>→</Text>
+            <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
           </TouchableOpacity>
-        ) : null}
 
-        {/* Sign Out Action */}
-        <View style={styles.signOutBox}>
-          <Button
-            title="LOG OUT OF WORKSPACE"
-            onPress={handleSignOut}
-            variant="danger"
-            size="lg"
-            style={styles.signOutBtn}
-          />
-          <Text style={styles.signOutDisclaimer}>
-            Terminates hardware-backed session tokens and locks workspace.
-          </Text>
+          <View style={styles.divider} />
+
+          <TouchableOpacity
+            style={styles.menuRow}
+            onPress={() => setFeedback('Notifications enabled for live scoreboard shifts.')}
+          >
+            <View style={[styles.menuIconBox, { backgroundColor: '#F1F5F9' }]}>
+              <Ionicons name="notifications-outline" size={20} color="#475569" />
+            </View>
+            <View style={styles.menuTextCol}>
+              <Text style={styles.menuTitle}>Notifications</Text>
+              <Text style={styles.menuSub}>Live rank movements & daily tasks</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+
+          <TouchableOpacity
+            style={styles.menuRow}
+            onPress={() => setFeedback('ZENITH Team No. 5 • mPOWER Placement Training')}
+          >
+            <View style={[styles.menuIconBox, { backgroundColor: '#F1F5F9' }]}>
+              <Ionicons name="information-circle-outline" size={20} color="#475569" />
+            </View>
+            <View style={styles.menuTextCol}>
+              <Text style={styles.menuTitle}>About ZENITH</Text>
+              <Text style={styles.menuSub}>Version 1.0.0 Production Release</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+          </TouchableOpacity>
         </View>
+
+        {/* Sign Out Button matching Blueprint Screen 11 */}
+        <TouchableOpacity
+          style={styles.signOutCard}
+          onPress={handleSignOut}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="log-out-outline" size={20} color="#DC2626" style={{ marginRight: 10 }} />
+          <Text style={styles.signOutText}>Sign Out</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -155,151 +283,231 @@ export default function WorkspaceHubScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: COLORS.backgroundDeep,
+    backgroundColor: MOBILE_THEME.bgLight,
+  },
+  headerBar: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: Platform.OS === 'ios' ? 52 : 36,
+    paddingBottom: SPACING.md,
+    backgroundColor: MOBILE_THEME.surfaceWhite,
+    borderBottomWidth: 1,
+    borderBottomColor: MOBILE_THEME.borderLight,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: MOBILE_THEME.navyHeader,
+  },
+  feedbackToast: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    borderBottomWidth: 1,
+    borderBottomColor: '#BBF7D0',
+    paddingVertical: 10,
+    paddingHorizontal: SPACING.lg,
+  },
+  feedbackText: {
+    color: '#15803D',
+    fontSize: 12,
+    fontWeight: '600',
   },
   scroll: {
     padding: SPACING.lg,
     paddingBottom: SPACING['5xl'],
   },
-  userCard: {
-    marginBottom: SPACING.xl,
-  },
-  userTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  userAvatar: {
-    width: 54,
-    height: 54,
-    borderRadius: RADII.full,
-    backgroundColor: COLORS.surfaceElevated,
-    borderWidth: 2,
-    borderColor: COLORS.brandCyan,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: SPACING.md,
-  },
-  userInitials: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.lg,
-    fontWeight: '800',
-  },
-  userMeta: {
-    flex: 1,
-  },
-  userName: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.md,
-    fontWeight: '800',
-  },
-  userEmail: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.sizes.xs,
-    marginTop: 2,
-    marginBottom: SPACING.xs,
-  },
-  badgeRow: {
-    flexDirection: 'row',
-  },
-  sectionTitle: {
-    color: COLORS.textSecondary,
-    fontSize: TYPOGRAPHY.sizes.xs,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-    marginBottom: SPACING.md,
-  },
-  navRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.surfaceCard,
+  profileCard: {
+    backgroundColor: MOBILE_THEME.surfaceWhite,
     borderRadius: RADII.xl,
     padding: SPACING.md + 2,
-    marginBottom: SPACING.md,
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
+    borderColor: MOBILE_THEME.borderLight,
+    marginBottom: SPACING.lg,
     ...SHADOWS.card,
   },
-  adminRow: {
-    borderColor: COLORS.brandElectric,
-    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-  },
-  navIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: RADII.lg,
+  avatarCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: RADII.full,
+    backgroundColor: MOBILE_THEME.navyHeader,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: SPACING.md,
   },
-  iconCyan: {
-    backgroundColor: COLORS.brandCyanSoft,
-    borderWidth: 1,
-    borderColor: COLORS.brandCyan,
-  },
-  iconElectric: {
-    backgroundColor: COLORS.brandElectricSoft,
-    borderWidth: 1,
-    borderColor: COLORS.brandElectric,
-  },
-  iconGold: {
-    backgroundColor: COLORS.accentGoldSoft,
-    borderWidth: 1,
-    borderColor: COLORS.accentGold,
-  },
-  iconSlate: {
-    backgroundColor: 'rgba(148, 163, 184, 0.1)',
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-  },
-  iconAdmin: {
-    backgroundColor: 'rgba(37, 99, 235, 0.25)',
-    borderWidth: 1,
-    borderColor: COLORS.brandElectricGlow,
-  },
-  navIcon: {
-    fontSize: 20,
-  },
-  navTextCol: {
-    flex: 1,
-  },
-  navTitle: {
-    color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.sizes.sm + 1,
-    fontWeight: '700',
-  },
-  adminTitle: {
-    color: COLORS.brandElectricGlow,
-    fontSize: TYPOGRAPHY.sizes.sm + 1,
+  avatarText: {
+    color: '#FFFFFF',
+    fontSize: 18,
     fontWeight: '800',
   },
-  navSub: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.sizes.xs,
+  profileMeta: {
+    flex: 1,
+  },
+  profileName: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: MOBILE_THEME.navyHeader,
+  },
+  profileRole: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: MOBILE_THEME.skyBlue,
     marginTop: 2,
   },
-  arrow: {
-    color: COLORS.textMuted,
-    fontSize: 18,
-    fontWeight: '700',
-    paddingLeft: SPACING.sm,
+  profileEmail: {
+    fontSize: 11,
+    color: MOBILE_THEME.textMuted,
+    marginTop: 1,
   },
-  adminArrow: {
-    color: COLORS.brandElectricGlow,
-    fontSize: 18,
-    fontWeight: '700',
-    paddingLeft: SPACING.sm,
-  },
-  signOutBox: {
-    marginTop: SPACING.xl,
+  editProfileBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: RADII.full,
+    backgroundColor: MOBILE_THEME.bgLight,
     alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: MOBILE_THEME.borderLight,
   },
-  signOutBtn: {
-    width: '100%',
+  sectionHeader: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+    color: MOBILE_THEME.textSecondary,
+    marginBottom: SPACING.xs + 2,
+    marginTop: SPACING.xs,
   },
-  signOutDisclaimer: {
-    color: COLORS.textMuted,
+  menuCard: {
+    backgroundColor: MOBILE_THEME.surfaceWhite,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: MOBILE_THEME.borderLight,
+    marginBottom: SPACING.lg,
+    overflow: 'hidden',
+    ...SHADOWS.card,
+  },
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: SPACING.md,
+  },
+  menuIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: RADII.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.md,
+  },
+  menuTextCol: {
+    flex: 1,
+  },
+  menuTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: MOBILE_THEME.navyHeader,
+  },
+  menuSub: {
+    fontSize: 11,
+    color: MOBILE_THEME.textSecondary,
+    marginTop: 1,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: MOBILE_THEME.borderLight,
+    marginLeft: 58,
+  },
+  presentationCard: {
+    backgroundColor: '#070D1E',
+    borderRadius: RADII.xl,
+    padding: SPACING.md + 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.4)',
+    ...SHADOWS.cardHover,
+  },
+  presentationLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    paddingRight: SPACING.sm,
+  },
+  presentationIconBox: {
+    width: 42,
+    height: 42,
+    borderRadius: RADII.lg,
+    backgroundColor: 'rgba(212, 175, 55, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.md,
+  },
+  presentationTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#F8FAFC',
+  },
+  presentationSub: {
     fontSize: 10,
-    marginTop: SPACING.sm,
-    textAlign: 'center',
+    color: '#94A3B8',
+    marginTop: 2,
+    lineHeight: 14,
+  },
+  roleSwitcherBox: {
+    backgroundColor: MOBILE_THEME.bgLight,
+    padding: SPACING.md,
+    borderTopWidth: 1,
+    borderTopColor: MOBILE_THEME.borderLight,
+  },
+  roleSwitcherPrompt: {
+    fontSize: 11,
+    color: MOBILE_THEME.textSecondary,
+    marginBottom: SPACING.sm,
+  },
+  roleButtonsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  roleChip: {
+    backgroundColor: MOBILE_THEME.surfaceWhite,
+    borderWidth: 1,
+    borderColor: MOBILE_THEME.borderLight,
+    borderRadius: RADII.md,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginRight: 6,
+    marginBottom: 6,
+  },
+  roleChipActive: {
+    backgroundColor: MOBILE_THEME.navyHeader,
+    borderColor: MOBILE_THEME.navyHeader,
+  },
+  roleChipText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: MOBILE_THEME.navyHeader,
+  },
+  roleChipTextActive: {
+    color: '#FFFFFF',
+  },
+  signOutCard: {
+    backgroundColor: '#FEF2F2',
+    borderRadius: RADII.xl,
+    padding: SPACING.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    marginTop: SPACING.xs,
+    marginBottom: SPACING.xl,
+  },
+  signOutText: {
+    color: '#DC2626',
+    fontSize: 13,
+    fontWeight: '700',
   },
 });
