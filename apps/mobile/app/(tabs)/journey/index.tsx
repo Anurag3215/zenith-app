@@ -29,7 +29,13 @@ export default function JourneyScreen() {
             <View style={[styles.barFill, { width: `${progressPct}%` }]} />
           </View>
           <Text style={styles.progressSub}>
-            {completedCount} of 4 Days Completed • Day 02 In Progress
+            {completedCount} of 4 Days Completed • {
+              DEMO_TRAINING_DAYS.find((d) => d.status === 'in_progress')
+                ? `Day 0${DEMO_TRAINING_DAYS.find((d) => d.status === 'in_progress')?.day_number} In Progress`
+                : DEMO_TRAINING_DAYS.find((d) => d.status === 'upcoming')
+                ? `Day 0${DEMO_TRAINING_DAYS.find((d) => d.status === 'upcoming')?.day_number} Upcoming`
+                : 'All Sessions Concluded'
+            }
           </Text>
         </View>
 

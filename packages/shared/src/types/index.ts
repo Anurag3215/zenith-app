@@ -55,10 +55,17 @@ export interface TrainingDay {
   schedule_date: string;
   description: string;
   focus_areas: string[];
+  topics_covered?: string[];
+  skills_practiced?: string[];
+  learning_outcomes?: string[];
+  notes?: string;
   trainer_name?: string;
   status: DayStatus;
+  is_published?: boolean;
   updated_at: string;
 }
+
+export type ReflectionVisibility = 'private' | 'team' | 'showcase';
 
 export interface Reflection {
   id: string;
@@ -68,9 +75,11 @@ export interface Reflection {
   member_name: string;
   member_role: AppRole;
   key_takeaways: string;
-  challenges_faced: string;
-  action_items: string;
+  challenges_faced?: string;
+  action_items?: string;
   mood_rating: 1 | 2 | 3 | 4 | 5;
+  visibility?: ReflectionVisibility;
+  is_draft?: boolean;
   is_approved_for_showcase: boolean;
   created_at: string;
   updated_at: string;
@@ -79,6 +88,7 @@ export interface Reflection {
 export interface ResourceItem {
   id: string;
   day_id?: string;
+  day_number?: 1 | 2 | 3 | 4;
   uploader_id: string;
   uploader_name: string;
   title: string;
@@ -90,14 +100,18 @@ export interface ResourceItem {
   created_at: string;
 }
 
+export type GalleryStatus = 'internal' | 'pending_review' | 'approved_showcase';
+
 export interface GalleryItem {
   id: string;
   day_id?: string;
+  day_number?: 1 | 2 | 3 | 4;
   uploader_id: string;
   uploader_name: string;
   media_url: string;
   caption: string;
   tags: string[];
+  status?: GalleryStatus;
   is_featured_showcase: boolean;
   created_at: string;
 }

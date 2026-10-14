@@ -36,6 +36,7 @@ export const COLORS = {
   successSoft: 'rgba(16, 185, 129, 0.15)',
   danger: '#EF4444',
   dangerSoft: 'rgba(239, 68, 68, 0.15)',
+  error: '#EF4444',
   warning: '#F97316',
   warningSoft: 'rgba(249, 115, 22, 0.15)',
   info: '#38BDF8',
@@ -67,6 +68,7 @@ export const RADII = {
   md: 8,
   lg: 12,
   xl: 16,
+  '2xl': 24,
   full: 9999,
 } as const;
 

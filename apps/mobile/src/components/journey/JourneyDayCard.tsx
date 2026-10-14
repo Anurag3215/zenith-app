@@ -86,7 +86,9 @@ export const JourneyDayCard: React.FC<JourneyDayCardProps> = ({
         </View>
 
         <View style={styles.cardFooter}>
-          <Text style={styles.footerActionText}>INSPECT DAY DELIVERABLES →</Text>
+          <Text style={styles.footerActionText}>
+            {day.status === 'completed' ? 'INSPECT DAY DELIVERABLES →' : 'VIEW UPCOMING SCHEDULE →'}
+          </Text>
         </View>
       </TouchableOpacity>
     </View>

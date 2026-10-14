@@ -7,12 +7,16 @@ import { Badge } from '../common/Badge';
 interface ReflectionCardProps {
   reflection: Reflection;
   canApprove?: boolean;
+  isAuthor?: boolean;
+  onEdit?: () => void;
   onToggleApproval?: () => void;
 }
 
 export const ReflectionCard: React.FC<ReflectionCardProps> = ({
   reflection,
   canApprove = false,
+  isAuthor = false,
+  onEdit,
   onToggleApproval,
 }) => {
   const renderStars = (rating: number) => {
@@ -24,7 +28,14 @@ export const ReflectionCard: React.FC<ReflectionCardProps> = ({
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.authorBlock}>
-          <Text style={styles.authorName}>{reflection.member_name}</Text>
+          <View style={styles.authorRow}>
+            <Text style={styles.authorName}>{reflection.member_name}</Text>
+            {reflection.is_draft ? (
+              <View style={styles.draftBadge}>
+                <Text style={styles.draftBadgeText}>LOCAL DRAFT</Text>
+              </View>
+            ) : null}
+          </View>
           <View style={styles.subMeta}>
             <Badge
               label={`DAY 0${reflection.day_number}`}
@@ -39,6 +50,16 @@ export const ReflectionCard: React.FC<ReflectionCardProps> = ({
                 role={reflection.member_role}
               />
             </View>
+            {reflection.visibility === 'private' ? (
+              <View style={{ marginLeft: SPACING.xs }}>
+                <Badge
+                  label="PRIVATE LOG"
+                  variant="custom"
+                  bg="rgba(148, 163, 184, 0.15)"
+                  color="#94A3B8"
+                />
+              </View>
+            ) : null}
           </View>
         </View>
 
@@ -68,7 +89,7 @@ export const ReflectionCard: React.FC<ReflectionCardProps> = ({
         </View>
       ) : null}
 
-      {/* Footer / Showcase Status */}
+      {/* Footer / Showcase Status & Author Controls */}
       <View style={styles.footer}>
         <View style={styles.showcaseStatus}>
           <View
@@ -80,22 +101,37 @@ export const ReflectionCard: React.FC<ReflectionCardProps> = ({
           <Text style={styles.showcaseText}>
             {reflection.is_approved_for_showcase
               ? 'Featured on Evaluator Web Showcase'
+              : reflection.visibility === 'private'
+              ? 'Private Author Log'
               : 'Internal Workspace Only'}
           </Text>
         </View>
 
-        {canApprove ? (
-          <TouchableOpacity
-            style={styles.toggleBtn}
-            onPress={onToggleApproval}
-            accessibilityRole="button"
-            accessibilityLabel="Toggle showcase approval status"
-          >
-            <Text style={styles.toggleText}>
-              {reflection.is_approved_for_showcase ? 'UNPUBLISH' : 'APPROVE FOR SHOWCASE ★'}
-            </Text>
-          </TouchableOpacity>
-        ) : null}
+        <View style={styles.controlsRow}>
+          {isAuthor && onEdit ? (
+            <TouchableOpacity
+              style={styles.editBtn}
+              onPress={onEdit}
+              accessibilityRole="button"
+              accessibilityLabel="Edit your reflection"
+            >
+              <Text style={styles.editText}>EDIT ✎</Text>
+            </TouchableOpacity>
+          ) : null}
+
+          {canApprove && !reflection.is_draft && reflection.visibility !== 'private' ? (
+            <TouchableOpacity
+              style={styles.toggleBtn}
+              onPress={onToggleApproval}
+              accessibilityRole="button"
+              accessibilityLabel="Toggle showcase approval status"
+            >
+              <Text style={styles.toggleText}>
+                {reflection.is_approved_for_showcase ? 'UNPUBLISH' : 'APPROVE FOR SHOWCASE ★'}
+              </Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
     </View>
   );
@@ -201,6 +237,44 @@ const styles = StyleSheet.create({
     borderColor: COLORS.brandCyan,
   },
   toggleText: {
+    color: COLORS.brandCyanLight,
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  authorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  draftBadge: {
+    backgroundColor: 'rgba(234, 179, 8, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(234, 179, 8, 0.4)',
+    borderRadius: RADII.sm,
+    paddingHorizontal: SPACING.xs + 2,
+    paddingVertical: 1,
+    marginLeft: SPACING.xs + 2,
+  },
+  draftBadgeText: {
+    color: COLORS.accentGoldBright,
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  controlsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  editBtn: {
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADII.md,
+    backgroundColor: COLORS.surfaceElevated,
+    borderWidth: 1,
+    borderColor: COLORS.brandElectric,
+    marginRight: SPACING.xs,
+  },
+  editText: {
     color: COLORS.brandCyanLight,
     fontSize: 10,
     fontWeight: '700',

@@ -9,7 +9,7 @@ import { Card } from '../../../src/components/common/Card';
 import { Button } from '../../../src/components/common/Button';
 import { InputField } from '../../../src/components/common/InputField';
 import { useAuth } from '../../../src/context/AuthContext';
-import { DEMO_PROFILES } from '@zenith/shared';
+import { DEMO_PROFILES, filterPermittedProfileUpdates } from '@zenith/shared';
 
 export default function MemberProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -22,6 +22,9 @@ export default function MemberProfileScreen() {
   const [bioText, setBioText] = useState(member.bio || '');
   const [skillsList, setSkillsList] = useState<string[]>(member.skills);
   const [newSkill, setNewSkill] = useState('');
+  const [linkedinUrl, setLinkedinUrl] = useState(member.linkedin_url || '');
+  const [githubUrl, setGithubUrl] = useState(member.github_url || '');
+  const [phoneVal, setPhoneVal] = useState(member.phone || '');
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const handleAddSkill = () => {
@@ -31,10 +34,32 @@ export default function MemberProfileScreen() {
     }
   };
 
+  const handleRemoveSkill = (skillToRemove: string) => {
+    setSkillsList(skillsList.filter((s) => s !== skillToRemove));
+  };
+
   const handleSaveProfile = () => {
+    // Enforce strict security whitelist: strip non-permitted fields
+    const { sanitized, strippedFields } = filterPermittedProfileUpdates(
+      user?.role || 'member',
+      user?.id || '',
+      member.id,
+      {
+        bio: bioText,
+        skills: skillsList,
+        linkedin_url: linkedinUrl.trim() || null,
+        github_url: githubUrl.trim() || null,
+        phone: phoneVal.trim() || null,
+      }
+    );
+
     setIsEditing(false);
-    setFeedback('Profile updates saved successfully (simulated preview).');
-    setTimeout(() => setFeedback(null), 3000);
+    if (strippedFields.length > 0) {
+      setFeedback(`Saved. Restricted fields (${strippedFields.join(', ')}) were ignored by RBAC guard.`);
+    } else {
+      setFeedback('Profile credentials updated successfully.');
+    }
+    setTimeout(() => setFeedback(null), 3500);
   };
 
   return (
@@ -74,6 +99,13 @@ export default function MemberProfileScreen() {
             </View>
           </View>
 
+          {/* Protected Fields Notice */}
+          <View style={styles.securityLockBox}>
+            <Text style={styles.securityLockText}>
+              🔒 Protected Fields: Role, Email, and Account Status are managed strictly by Team Administration and cannot be altered via self-service forms.
+            </Text>
+          </View>
+
           {isSelf ? (
             <TouchableOpacity
               style={styles.editToggleBtn}
@@ -84,7 +116,11 @@ export default function MemberProfileScreen() {
                 {isEditing ? 'CANCEL EDITING ✕' : 'EDIT MY PROFILE ✎'}
               </Text>
             </TouchableOpacity>
-          ) : null}
+          ) : (
+            <View style={styles.readOnlyIndicator}>
+              <Text style={styles.readOnlyText}>READ-ONLY PEER PROFILE VIEW</Text>
+            </View>
+          )}
         </Card>
 
         {/* Biography Section */}
@@ -110,6 +146,14 @@ export default function MemberProfileScreen() {
             {skillsList.map((skill, idx) => (
               <View key={idx} style={styles.skillChip}>
                 <Text style={styles.skillText}>{skill}</Text>
+                {isEditing ? (
+                  <TouchableOpacity
+                    onPress={() => handleRemoveSkill(skill)}
+                    style={styles.removeSkillBtn}
+                  >
+                    <Text style={styles.removeSkillText}>✕</Text>
+                  </TouchableOpacity>
+                ) : null}
               </View>
             ))}
           </View>
@@ -135,18 +179,49 @@ export default function MemberProfileScreen() {
         {/* Verification & Social Credentials */}
         <Card variant="default" style={styles.sectionCard}>
           <Text style={styles.sectionHeading}>CREDENTIAL PLACEHOLDERS & LINKS</Text>
-          <View style={styles.linkRow}>
-            <Text style={styles.linkLabel}>LINKEDIN:</Text>
-            <Text style={styles.linkPlaceholder}>[Official LinkedIn Profile Pending Verification]</Text>
-          </View>
-          <View style={styles.linkRow}>
-            <Text style={styles.linkLabel}>GITHUB:</Text>
-            <Text style={styles.linkPlaceholder}>[Official GitHub Profile Pending Verification]</Text>
-          </View>
-          <View style={styles.linkRow}>
-            <Text style={styles.linkLabel}>EMERGENCY PHONE:</Text>
-            <Text style={styles.linkPlaceholder}>[Verified Institutional Contact Pending]</Text>
-          </View>
+          {isEditing ? (
+            <>
+              <InputField
+                label="LINKEDIN PROFILE URL"
+                placeholder="https://linkedin.com/in/username"
+                value={linkedinUrl}
+                onChangeText={setLinkedinUrl}
+              />
+              <InputField
+                label="GITHUB PROFILE URL"
+                placeholder="https://github.com/username"
+                value={githubUrl}
+                onChangeText={setGithubUrl}
+              />
+              <InputField
+                label="CONTACT PHONE (INTERNAL)"
+                placeholder="+91 XXXXX XXXXX"
+                value={phoneVal}
+                onChangeText={setPhoneVal}
+              />
+            </>
+          ) : (
+            <>
+              <View style={styles.linkRow}>
+                <Text style={styles.linkLabel}>LINKEDIN:</Text>
+                <Text style={styles.linkPlaceholder}>
+                  {member.linkedin_url || '[Official LinkedIn Profile Pending Verification]'}
+                </Text>
+              </View>
+              <View style={styles.linkRow}>
+                <Text style={styles.linkLabel}>GITHUB:</Text>
+                <Text style={styles.linkPlaceholder}>
+                  {member.github_url || '[Official GitHub Profile Pending Verification]'}
+                </Text>
+              </View>
+              <View style={styles.linkRow}>
+                <Text style={styles.linkLabel}>EMERGENCY PHONE:</Text>
+                <Text style={styles.linkPlaceholder}>
+                  {member.phone || '[Verified Institutional Contact Pending]'}
+                </Text>
+              </View>
+            </>
+          )}
         </Card>
 
         {isEditing ? (
@@ -296,5 +371,38 @@ const styles = StyleSheet.create({
   saveBtn: {
     marginTop: SPACING.sm,
     marginBottom: SPACING.xl,
+  },
+  securityLockBox: {
+    backgroundColor: 'rgba(234, 179, 8, 0.08)',
+    borderRadius: RADII.sm,
+    padding: SPACING.sm,
+    marginTop: SPACING.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(234, 179, 8, 0.25)',
+  },
+  securityLockText: {
+    color: COLORS.accentGoldBright,
+    fontSize: 10,
+    lineHeight: 14,
+  },
+  readOnlyIndicator: {
+    marginTop: SPACING.sm,
+    paddingTop: SPACING.xs,
+    alignItems: 'flex-end',
+  },
+  readOnlyText: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  removeSkillBtn: {
+    marginLeft: SPACING.xs,
+    paddingHorizontal: 4,
+  },
+  removeSkillText: {
+    color: COLORS.error,
+    fontSize: 10,
+    fontWeight: '800',
   },
 });

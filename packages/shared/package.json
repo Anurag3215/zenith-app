@@ -7,7 +7,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc",
-    "test": "tsc && node dist/__tests__/domain.test.js && node dist/__tests__/authorization.test.js && node dist/__tests__/scoreboard.test.js"
+    "test": "tsc && node dist/__tests__/domain.test.js && node dist/__tests__/authorization.test.js && node dist/__tests__/scoreboard.test.js && node dist/__tests__/journey_and_reflections.test.js"
   },
   "devDependencies": {
     "typescript": "^5.3.3"

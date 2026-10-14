@@ -38,32 +38,76 @@ export default function JourneyDayDetailScreen() {
           ) : null}
         </Card>
 
-        {/* Detailed Module Breakdown */}
-        <Text style={styles.sectionTitle}>DETAILED MODULE BREAKDOWN</Text>
+        {/* Curriculum Content Breakdown */}
+        {day.status === 'completed' ? (
+          <>
+            <Text style={styles.sectionTitle}>DELIVERED TOPICS & SYLLABUS</Text>
+            {day.topics_covered && day.topics_covered.length > 0 ? (
+              <Card variant="default" style={styles.moduleCard}>
+                {day.topics_covered.map((topic, i) => (
+                  <View key={i} style={styles.bulletRow}>
+                    <Text style={styles.bulletDot}>•</Text>
+                    <Text style={styles.bulletText}>{topic}</Text>
+                  </View>
+                ))}
+              </Card>
+            ) : null}
 
-        <Card variant="default" style={styles.moduleCard}>
-          <Text style={styles.moduleTime}>SESSION 01 • MORNING (09:00 - 12:30)</Text>
-          <Text style={styles.moduleName}>Foundational Theory & Interactive Concept Drill</Text>
-          <Text style={styles.moduleDesc}>
-            Deep-dive lecture on core concepts, live problem-solving walk-through, and architectural patterns.
-          </Text>
-        </Card>
+            {day.skills_practiced && day.skills_practiced.length > 0 ? (
+              <>
+                <Text style={styles.sectionTitle}>SKILLS PRACTICED</Text>
+                <View style={styles.tagsRow}>
+                  {day.skills_practiced.map((skill, i) => (
+                    <View key={i} style={styles.skillPill}>
+                      <Text style={styles.skillText}>⚡ {skill}</Text>
+                    </View>
+                  ))}
+                </View>
+              </>
+            ) : null}
 
-        <Card variant="default" style={styles.moduleCard}>
-          <Text style={styles.moduleTime}>SESSION 02 • AFTERNOON (13:30 - 17:00)</Text>
-          <Text style={styles.moduleName}>Live Competitive Squad Sprint</Text>
-          <Text style={styles.moduleDesc}>
-            Timed cohort challenge where groups compete for points that reflect directly on the mPOWER live scoreboard.
-          </Text>
-        </Card>
+            {day.learning_outcomes && day.learning_outcomes.length > 0 ? (
+              <>
+                <Text style={styles.sectionTitle}>VERIFIED LEARNING OUTCOMES</Text>
+                <Card variant="default" style={styles.moduleCard}>
+                  {day.learning_outcomes.map((outcome, i) => (
+                    <View key={i} style={styles.outcomeRow}>
+                      <Text style={styles.outcomeCheck}>✓</Text>
+                      <Text style={styles.outcomeText}>{outcome}</Text>
+                    </View>
+                  ))}
+                </Card>
+              </>
+            ) : null}
 
-        <Card variant="default" style={styles.moduleCard}>
-          <Text style={styles.moduleTime}>SESSION 03 • EVENING (17:30 - 19:00)</Text>
-          <Text style={styles.moduleName}>Team Debrief, Reflection & Mentorship Review</Text>
-          <Text style={styles.moduleDesc}>
-            Individual submission of structured takeaways and action items. Mentors inspect deliverables.
-          </Text>
-        </Card>
+            {day.notes ? (
+              <>
+                <Text style={styles.sectionTitle}>COORDINATOR NOTES</Text>
+                <Card variant="default" style={styles.moduleCard}>
+                  <Text style={styles.notesText}>{day.notes}</Text>
+                </Card>
+              </>
+            ) : null}
+          </>
+        ) : (
+          <>
+            <Text style={styles.sectionTitle}>CURRICULUM DELIVERY STATUS</Text>
+            <Card variant="default" style={styles.pendingCard}>
+              <View style={styles.pendingHeader}>
+                <Text style={styles.pendingIcon}>⏳</Text>
+                <Text style={styles.pendingTitle}>Awaiting Live Faculty Delivery</Text>
+              </View>
+              <Text style={styles.pendingDesc}>
+                In strict compliance with placement evaluation guidelines, training topics, competencies, and deliverables for Day 0{day.day_number} remain unpopulated until delivered by faculty leads.
+              </Text>
+              <View style={styles.pendingDateBox}>
+                <Text style={styles.pendingDateText}>
+                  Scheduled Date: {day.schedule_date} • Status: Pending Faculty Delivery
+                </Text>
+              </View>
+            </Card>
+          </>
+        )}
 
         {/* Focus Areas */}
         <Text style={styles.sectionTitle}>CURRICULUM TAGS</Text>
@@ -191,5 +235,97 @@ const styles = StyleSheet.create({
   },
   actionBtn: {
     marginBottom: SPACING.md,
+  },
+  bulletRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.xs + 2,
+  },
+  bulletDot: {
+    color: COLORS.brandCyanLight,
+    fontSize: 14,
+    marginRight: SPACING.xs,
+    lineHeight: 18,
+  },
+  bulletText: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.sizes.xs + 1,
+    lineHeight: 18,
+    flex: 1,
+  },
+  skillPill: {
+    backgroundColor: 'rgba(6, 182, 212, 0.12)',
+    borderRadius: RADII.full,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    marginRight: SPACING.sm,
+    marginBottom: SPACING.xs,
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.3)',
+  },
+  skillText: {
+    color: COLORS.brandCyanLight,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  outcomeRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.xs + 2,
+  },
+  outcomeCheck: {
+    color: COLORS.success,
+    fontSize: 12,
+    fontWeight: '800',
+    marginRight: SPACING.xs,
+    lineHeight: 18,
+  },
+  outcomeText: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.sizes.xs + 1,
+    lineHeight: 18,
+    flex: 1,
+  },
+  notesText: {
+    color: COLORS.textSecondary,
+    fontSize: TYPOGRAPHY.sizes.xs + 1,
+    lineHeight: 18,
+    fontStyle: 'italic',
+  },
+  pendingCard: {
+    marginBottom: SPACING.lg,
+    borderColor: 'rgba(234, 179, 8, 0.3)',
+    backgroundColor: 'rgba(234, 179, 8, 0.05)',
+  },
+  pendingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.xs + 2,
+  },
+  pendingIcon: {
+    fontSize: 16,
+    marginRight: SPACING.xs,
+  },
+  pendingTitle: {
+    color: COLORS.accentGoldBright,
+    fontSize: TYPOGRAPHY.sizes.sm,
+    fontWeight: '700',
+  },
+  pendingDesc: {
+    color: COLORS.textSecondary,
+    fontSize: TYPOGRAPHY.sizes.xs,
+    lineHeight: 18,
+    marginBottom: SPACING.sm,
+  },
+  pendingDateBox: {
+    backgroundColor: COLORS.surfaceElevated,
+    borderRadius: RADII.sm,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+  },
+  pendingDateText: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '600',
   },
 });

@@ -5,10 +5,17 @@ import { COLORS, SPACING, RADII, TYPOGRAPHY, SHADOWS } from '../../theme';
 
 interface GalleryCardProps {
   item: GalleryItem;
+  canCurate?: boolean;
   onPress: () => void;
+  onToggleCurate?: () => void;
 }
 
-export const GalleryCard: React.FC<GalleryCardProps> = ({ item, onPress }) => {
+export const GalleryCard: React.FC<GalleryCardProps> = ({
+  item,
+  canCurate = false,
+  onPress,
+  onToggleCurate,
+}) => {
   return (
     <TouchableOpacity
       style={styles.card}
@@ -21,13 +28,28 @@ export const GalleryCard: React.FC<GalleryCardProps> = ({ item, onPress }) => {
       <View style={styles.mediaPlaceholder}>
         <View style={styles.innerCrest}>
           <Text style={styles.crestIcon}>📷</Text>
-          <Text style={styles.crestText}>[Milestone Photo Pending]</Text>
+          <Text style={styles.crestText}>[Milestone Photo Record]</Text>
         </View>
-        {item.is_featured_showcase ? (
+
+        {item.day_number ? (
+          <View style={styles.dayBadge}>
+            <Text style={styles.dayBadgeText}>DAY 0{item.day_number}</Text>
+          </View>
+        ) : null}
+
+        {item.is_featured_showcase || item.status === 'approved_showcase' ? (
           <View style={styles.featuredBadge}>
             <Text style={styles.featuredBadgeText}>★ SHOWCASE FEATURED</Text>
           </View>
-        ) : null}
+        ) : item.status === 'pending_review' ? (
+          <View style={[styles.featuredBadge, styles.pendingBadge]}>
+            <Text style={[styles.featuredBadgeText, styles.pendingBadgeText]}>⏳ PENDING REVIEW</Text>
+          </View>
+        ) : (
+          <View style={[styles.featuredBadge, styles.internalBadge]}>
+            <Text style={[styles.featuredBadgeText, styles.internalBadgeText]}>🔒 INTERNAL ONLY</Text>
+          </View>
+        )}
       </View>
 
       {/* Meta */}
@@ -37,12 +59,26 @@ export const GalleryCard: React.FC<GalleryCardProps> = ({ item, onPress }) => {
         </Text>
         <Text style={styles.uploaderText}>Captured by {item.uploader_name}</Text>
 
-        <View style={styles.tagsRow}>
-          {item.tags.map((tag, idx) => (
-            <View key={idx} style={styles.tagChip}>
-              <Text style={styles.tagText}>#{tag}</Text>
-            </View>
-          ))}
+        <View style={styles.bottomRow}>
+          <View style={styles.tagsRow}>
+            {item.tags.map((tag, idx) => (
+              <View key={idx} style={styles.tagChip}>
+                <Text style={styles.tagText}>#{tag}</Text>
+              </View>
+            ))}
+          </View>
+
+          {canCurate && onToggleCurate ? (
+            <TouchableOpacity
+              style={styles.curateBtn}
+              onPress={onToggleCurate}
+              accessibilityRole="button"
+            >
+              <Text style={styles.curateText}>
+                {item.is_featured_showcase ? 'UNFEATURE' : 'FEATURE ★'}
+              </Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       </View>
     </TouchableOpacity>
@@ -129,5 +165,55 @@ const styles = StyleSheet.create({
     color: COLORS.brandCyanLight,
     fontSize: 10,
     fontWeight: '600',
+  },
+  dayBadge: {
+    position: 'absolute',
+    top: SPACING.sm,
+    left: SPACING.sm,
+    backgroundColor: COLORS.surfaceCard,
+    borderWidth: 1,
+    borderColor: COLORS.brandCyan,
+    borderRadius: RADII.sm,
+    paddingHorizontal: SPACING.xs + 2,
+    paddingVertical: 2,
+  },
+  dayBadgeText: {
+    color: COLORS.brandCyanLight,
+    fontSize: 9,
+    fontWeight: '800',
+  },
+  pendingBadge: {
+    backgroundColor: 'rgba(234, 179, 8, 0.15)',
+    borderColor: 'rgba(234, 179, 8, 0.4)',
+  },
+  pendingBadgeText: {
+    color: COLORS.accentGoldBright,
+  },
+  internalBadge: {
+    backgroundColor: 'rgba(148, 163, 184, 0.15)',
+    borderColor: 'rgba(148, 163, 184, 0.4)',
+  },
+  internalBadgeText: {
+    color: '#94A3B8',
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: SPACING.xs,
+  },
+  curateBtn: {
+    backgroundColor: COLORS.surfaceElevated,
+    borderWidth: 1,
+    borderColor: COLORS.accentGold,
+    borderRadius: RADII.md,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+  },
+  curateText: {
+    color: COLORS.accentGoldBright,
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 });
