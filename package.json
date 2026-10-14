@@ -1,0 +1,29 @@
+{
+  "name": "zenith-team5-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZENITH — Team No. 5 Monorepo for mPOWER Placement Training Program",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:mobile": "npm --workspace=apps/mobile run start",
+    "dev:showcase": "npm --workspace=apps/showcase run dev",
+    "build:showcase": "npm --workspace=apps/showcase run build",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "keywords": [
+    "zenith",
+    "mpower",
+    "placement-training",
+    "react-native",
+    "expo",
+    "nextjs",
+    "supabase"
+  ],
+  "author": "ZENITH Team No. 5",
+  "license": "UNLICENSED"
+}
