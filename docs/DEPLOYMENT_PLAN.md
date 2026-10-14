@@ -84,13 +84,27 @@ flowchart TD
    npx supabase db reset --seed
    ```
 
-### Step 2: Companion Web Showcase Deployment (Vercel)
+### Step 2: Companion Web Showcase Deployment (Next.js & Vercel)
 1. Import the repository into Vercel and set the Root Directory to `apps/showcase`.
-2. Configure Environment Variables in the Vercel Dashboard:
+2. Framework preset: Next.js (App Router).
+3. Build Command: `npm run build` (or from monorepo root: `npm run build:showcase`).
+4. Output Directory: `.next`.
+5. Configure Environment Variables in the Vercel Dashboard:
    - `NEXT_PUBLIC_SUPABASE_URL`: Supabase Project URL.
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase Anonymous Public Key.
    - `NEXT_PUBLIC_SHOWCASE_BASE_URL`: Evaluator portal domain.
-3. Trigger deployment and verify that the public dashboard resolves cleanly.
+6. Local Evaluator Testing:
+   ```bash
+   # Run development server at http://localhost:3000
+   npm run dev:showcase
+
+   # Production build verification
+   npm run build:showcase
+   ```
+7. Routes for Evaluator Assessment:
+   - `/`: Public Landing Page, Read-Only Scoreboard, Growth Dashboard, 4-Day Journey, Roster.
+   - `/present`: Distraction-Free Projector Presentation Mode (16:9 widescreen, arrow navigation).
+   - `/report`: Certified Executive Dossier with one-click print-to-PDF layout (`window.print()`).
 
 ### Step 3: Mobile Client Build & Signing (EAS)
 1. Install EAS CLI globally: `npm install -g eas-cli`.
