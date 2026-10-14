@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "ZENITH — Team No. 5",
+    "slug": "zenith-team-5",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "zenith",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#050814",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "edu.zenith5.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#050814"
+      },
+      "package": "edu.zenith5.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
