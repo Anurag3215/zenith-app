@@ -3,9 +3,10 @@
 > **mPOWER Placement Training Program — Flagship Cross-Platform Mobile Application & Evaluator Companion Ecosystem**
 
 [![Stack: React Native](https://img.shields.io/badge/Mobile-React%20Native%20%7C%20Expo-000000?style=for-the-badge&logo=expo)](https://expo.dev)
-[![Web: Next.js](https://img.shields.io/badge/Showcase-Next.js%2015-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
+[![Web: Next.js](https://img.shields.io/badge/Showcase-Next.js%2014-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
 [![Backend: Supabase](https://img.shields.io/badge/Backend-Supabase%20PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com)
 [![TypeScript: Strict](https://img.shields.io/badge/TypeScript-Strict%205.3-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org)
+[![Tests: 44 Passing](https://img.shields.io/badge/Tests-44%20Passing%20(6%20Suites)-success?style=for-the-badge)](docs/FINAL_HANDOVER.md)
 
 ---
 
@@ -14,30 +15,32 @@
 **ZENITH — Team No. 5** is an enterprise-grade mobile application and companion web showcase engineered for the **mPOWER Placement Training Program**. Designed for live demonstration before evaluators and mentors, the application provides an authenticated private workspace for Team 5's eight enrolled members alongside a public, read-only companion web portal for program evaluation panels.
 
 ### Key Capabilities
-- **Native Cross-Platform Mobile App:** Built with Expo and Expo Router for Android and iOS.
+- **Native Cross-Platform Mobile App:** Built with Expo SDK 52 and Expo Router for Android and iOS.
 - **Login-First Private Workspace:** Pre-provisioned for exactly 8 team members with zero public sign-ups.
 - **Role-Based Authorization (RBAC):** Database-enforced permissions for Team Admin, Captain, Vice-Captain, and ordinary members.
-- **Live Competition Scoreboard:** Real-time multi-group standings with instant push synchronization via Supabase Realtime and resilient polling fallback.
+- **Live Competition Scoreboard:** Real-time multi-group standings with standard 1224 competition tie rules, authentic rank movement calculation, and optimistic updates.
 - **Restricted Score Editing:** Score updates restricted exclusively to Captain and Vice-Captain with mandatory audit justifications and immutable transaction logging.
 - **Curriculum & Growth Engine:** 4-Day training journey timeline, structured daily reflection submission, document management, and photo gallery.
-- **Public Evaluator Showcase:** Companion Next.js web application enabling frictionless, zero-login evaluation, live scoreboard viewing, and growth dossier export.
+- **Public Evaluator Showcase:** Companion Next.js 14 web application enabling frictionless, zero-login evaluation, live scoreboard viewing, distraction-free projector mode (`/present`), and certified executive dossier export (`/report`).
 
 ---
 
 ## 2. Monorepo Repository Structure
 
 ```text
-ZENITH-app/
+d:/ZENITH-app/
 ├── apps/
-│   ├── mobile/             # React Native Expo application (Android & iOS)
-│   └── showcase/           # Companion Evaluator Web Portal (Next.js App Router)
+│   ├── mobile/             # React Native Expo SDK 52 application (Android & iOS)
+│   └── showcase/           # Companion Evaluator Web Portal (Next.js 14 App Router)
 ├── packages/
-│   ├── shared/             # Shared TypeScript models, Zod validation schemas, constants
+│   ├── shared/             # Shared TypeScript domain models, 1224 ranking algorithm, sanitization allowlists
 │   └── config/             # Shared ESLint and TypeScript base configurations
 ├── supabase/
-│   ├── migrations/         # PostgreSQL schema migrations and RLS policies
-│   └── seed.sql            # Seed dataset (Groups, 8 Provisioned Accounts, Curriculum)
-├── docs/                   # Formal Architecture & Specification Documentation
+│   ├── migrations/         # PostgreSQL schema migrations, RLS policies, and concurrency functions
+│   └── seed.sql            # Seed dataset (10 Groups, 8 Provisioned Accounts, 4-Day Curriculum)
+├── docs/                   # Formal Architecture & Production Release Documentation
+│   ├── FINAL_HANDOVER.md   # ★ Master Release Handover Dossier & Status Matrix
+│   ├── RUNBOOKS.md         # ★ Operational Runbooks (PITR, Mobile/Web Rollbacks, Key Rotation)
 │   ├── PRODUCT_REQUIREMENTS.md
 │   ├── TECHNICAL_ARCHITECTURE.md
 │   ├── DATABASE_DESIGN.md
@@ -58,6 +61,8 @@ Detailed specifications for each layer of the application are maintained in the 
 
 | Document | Purpose |
 | :--- | :--- |
+| [**Final Production Handover**](docs/FINAL_HANDOVER.md) | **Master release dossier, deliverable status matrix, production verification evidence.** |
+| [**Operational Runbooks**](docs/RUNBOOKS.md) | **Disaster recovery runbooks (PITR restore, EAS OTA rollback, Vercel edge rollback, key rotation).** |
 | [Product Requirements (PRD)](docs/PRODUCT_REQUIREMENTS.md) | User personas, functional requirements (FR-01 to FR-15), NFRs, and scope boundaries. |
 | [Technical Architecture](docs/TECHNICAL_ARCHITECTURE.md) | Monorepo layout, system topology, data flow diagrams, and state management. |
 | [Database Design](docs/DATABASE_DESIGN.md) | PostgreSQL schema definitions, ER diagrams, foreign keys, and stored procedures. |
@@ -81,8 +86,8 @@ Detailed specifications for each layer of the application are maintained in the 
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/ZENITH-Team5/ZENITH-app.git
-   cd ZENITH-app
+   git clone https://github.com/Anurag3215/zenith-app.git
+   cd zenith-app
    ```
 
 2. **Configure Environment Variables:**
@@ -96,7 +101,17 @@ Detailed specifications for each layer of the application are maintained in the 
    npm install
    ```
 
-4. **Run Development Services:**
+4. **Run Automated Test Suites (44 Tests across 6 Suites):**
+   ```bash
+   npm run test --workspace=@zenith/shared
+   ```
+
+5. **Run TypeScript Typechecks (0 Errors):**
+   ```bash
+   npm run typecheck --workspaces --if-present
+   ```
+
+6. **Run Development Services:**
    - **Launch Mobile App (Expo):**
      ```bash
      npm run dev:mobile
@@ -105,6 +120,17 @@ Detailed specifications for each layer of the application are maintained in the 
      ```bash
      npm run dev:showcase
      ```
+
+7. **Build Production Evaluator Showcase:**
+   ```bash
+   npm run build:showcase
+   ```
+
+8. **Build Android Preview Universal APK (Direct Sideloading):**
+   ```bash
+   cd apps/mobile
+   eas build --platform android --profile preview
+   ```
 
 ---
 

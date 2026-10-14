@@ -248,3 +248,31 @@ export function validateCurriculumIntegrity(days: TrainingDay[]): {
 
   return { valid: errors.length === 0, errors };
 }
+
+export interface PublicProfile {
+  id: string;
+  full_name: string;
+  role: AppRole;
+  skills: string[];
+  bio: string | null;
+  avatar_url: string | null;
+  linkedin_url: string | null;
+  github_url: string | null;
+}
+
+/**
+ * Strips private contact info (email, phone, account status) for public showcase consumption.
+ */
+export function sanitizePublicProfile(profile: Profile): PublicProfile {
+  return {
+    id: profile.id,
+    full_name: profile.full_name,
+    role: profile.role,
+    skills: [...profile.skills],
+    bio: profile.bio,
+    avatar_url: profile.avatar_url,
+    linkedin_url: profile.linkedin_url,
+    github_url: profile.github_url,
+  };
+}
+
