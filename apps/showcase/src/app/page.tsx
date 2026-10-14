@@ -8,6 +8,14 @@ import { JourneyTimelineView } from '../components/JourneyTimelineView';
 import { RosterGrid } from '../components/RosterGrid';
 import { GallerySection } from '../components/GallerySection';
 import { ReflectionsHighlight } from '../components/ReflectionsHighlight';
+import {
+  PresentationIcon,
+  DocumentIcon,
+  TrophyIcon,
+  ShieldCheckIcon,
+  StarIcon,
+  ArrowRightIcon,
+} from '../components/Icons';
 
 export default function ShowcaseLandingPage() {
   const data = getPublicShowcaseData();
@@ -21,12 +29,18 @@ export default function ShowcaseLandingPage() {
       <section style={styles.hero}>
         <div className="container" style={styles.heroContainer}>
           <div style={styles.heroBadgeRow}>
-            <span style={styles.heroBadge}>TEAM NO. 5 • COHORT STANDING: RANK 2</span>
-            <span style={styles.verifiedTag}>✓ Officially Certified Data</span>
+            <div style={styles.heroBadge}>
+              <span style={styles.liveDot} className="pulse-dot" />
+              <span>TEAM NO. 5 • COHORT STANDING: RANK 2</span>
+            </div>
+            <div style={styles.verifiedTag}>
+              <ShieldCheckIcon size={14} color="#10B981" />
+              <span>Certified Placement Data</span>
+            </div>
           </div>
 
           <h1 style={styles.heroTitle}>
-            Engineering Excellence, Rigorous Preparation & Placement Leadership
+            Engineering Excellence, Rigorous Preparation & <span className="gradient-text-cyan">Placement Leadership</span>
           </h1>
 
           <p style={styles.heroDesc}>
@@ -35,28 +49,28 @@ export default function ShowcaseLandingPage() {
 
           <div style={styles.ctaRow}>
             <Link href="/present" style={styles.ctaPrimary}>
-              <span>📽️</span>
+              <PresentationIcon size={16} color="#FFFFFF" />
               <span>ENTER PRESENTATION MODE</span>
             </Link>
             <Link href="/report" style={styles.ctaSecondary}>
-              <span>📄</span>
-              <span>DOWNLOAD EXECUTIVE REPORT</span>
+              <DocumentIcon size={16} color="#94A3B8" />
+              <span>EXECUTIVE DOSSIER (PDF)</span>
             </Link>
             <Link href="/#scoreboard" style={styles.ctaOutline}>
-              <span>🏆</span>
-              <span>LEADERBOARD SNAPSHOT</span>
+              <TrophyIcon size={16} color="#FBBF24" />
+              <span>LEADERBOARD STANDINGS</span>
             </Link>
           </div>
 
-          {/* Quick Metrics Bar */}
-          <div style={styles.quickBar}>
+          {/* Quick Metrics Floating Bar */}
+          <div style={styles.quickBar} className="glass-panel">
             <div style={styles.quickMetric}>
-              <div style={styles.quickValue}>#{zenithGroup?.rank || 2}</div>
+              <div style={styles.quickValue} className="gradient-text-gold">#{zenithGroup?.rank || 2}</div>
               <div style={styles.quickLabel}>COHORT RANK</div>
             </div>
             <div style={styles.quickDivider} />
             <div style={styles.quickMetric}>
-              <div style={styles.quickValue}>{zenithGroup?.current_points || 465}</div>
+              <div style={styles.quickValue} className="gradient-text-cyan">{zenithGroup?.current_points || 465}</div>
               <div style={styles.quickLabel}>TOTAL POINTS</div>
             </div>
             <div style={styles.quickDivider} />
@@ -66,7 +80,7 @@ export default function ShowcaseLandingPage() {
             </div>
             <div style={styles.quickDivider} />
             <div style={styles.quickMetric}>
-              <div style={styles.quickValue}>1 of 4</div>
+              <div style={styles.quickValue}>1 <span style={{ fontSize: '14px', color: '#64748B' }}>/ 4</span></div>
               <div style={styles.quickLabel}>DAYS COMPLETED</div>
             </div>
           </div>
@@ -109,39 +123,50 @@ export default function ShowcaseLandingPage() {
         </section>
 
         {/* Genuine Lessons & Future Commitments Section */}
-        <section style={styles.closingSection}>
+        <section style={styles.closingSection} className="glass-panel">
           <div style={styles.closingHeader}>
-            <div style={styles.closingPre}>REFLECTION & AMBITION</div>
+            <div style={styles.closingPre}>TRAINING MASTERY</div>
             <h2 style={styles.closingTitle}>Genuine Lessons & Future Placement Commitments</h2>
+            <p style={styles.closingDesc}>Authentic experiential takeaways captured directly from team delivery.</p>
           </div>
 
           <div style={styles.closingGrid}>
             <div style={styles.closingCard}>
-              <h3 style={styles.closingCardTitle}>💡 Key Lessons from Day 1 Delivery</h3>
+              <div style={styles.closingCardHeader}>
+                <div style={styles.closingCardIcon}>
+                  <StarIcon size={18} color="#FBBF24" />
+                </div>
+                <h3 style={styles.closingCardTitle}>Key Lessons from Day 1 Delivery</h3>
+              </div>
               <ul style={styles.closingList}>
                 <li>
-                  <strong>Speed Mathematics Discipline:</strong> Sectional aptitude under 60-second time boundaries requires systematic recognition of algebraic shortcuts rather than brute-force computation.
+                  <strong style={{ color: '#F8FAFC' }}>Speed Mathematics Discipline:</strong> Sectional aptitude under 60-second time boundaries requires systematic recognition of algebraic shortcuts rather than brute-force computation.
                 </li>
                 <li>
-                  <strong>Quantified Resume Articulation:</strong> Evaluator panels prioritize measurable business impact and problem scale over generic keyword lists.
+                  <strong style={{ color: '#F8FAFC' }}>Quantified Resume Articulation:</strong> Evaluator panels prioritize measurable business impact and problem scale over generic keyword lists.
                 </li>
                 <li>
-                  <strong>Operational Squad Synergy:</strong> Rapid consensus and structured turn-taking during group discussions generate higher cohort scores than aggressive dominance.
+                  <strong style={{ color: '#F8FAFC' }}>Operational Squad Synergy:</strong> Rapid consensus and structured turn-taking during group discussions generate higher cohort scores than aggressive dominance.
                 </li>
               </ul>
             </div>
 
             <div style={styles.closingCard}>
-              <h3 style={styles.closingCardTitle}>🚀 Forward Commitments for Days 2–4</h3>
+              <div style={styles.closingCardHeader}>
+                <div style={styles.closingCardIcon}>
+                  <ShieldCheckIcon size={18} color="#00F0FF" />
+                </div>
+                <h3 style={styles.closingCardTitle}>Forward Commitments for Days 2–4</h3>
+              </div>
               <ul style={styles.closingList}>
                 <li>
-                  <strong>Technical Rigor:</strong> Execute algorithmic coding rounds with strict attention to time and space complexity boundaries.
+                  <strong style={{ color: '#F8FAFC' }}>Technical Rigor:</strong> Execute algorithmic coding rounds with strict attention to time and space complexity boundaries.
                 </li>
                 <li>
-                  <strong>Interview Confidence:</strong> Apply the STAR methodology in mock behavioral rounds with verified situational anecdotes.
+                  <strong style={{ color: '#F8FAFC' }}>Interview Confidence:</strong> Apply the STAR methodology in mock behavioral rounds with verified situational anecdotes.
                 </li>
                 <li>
-                  <strong>Podium Finish:</strong> Sustain Team 5's top-tier standing on the mPOWER competition leaderboard through rigorous peer coaching.
+                  <strong style={{ color: '#F8FAFC' }}>Podium Finish:</strong> Sustain Team 5&apos;s top-tier standing on the mPOWER competition leaderboard through rigorous peer coaching.
                 </li>
               </ul>
             </div>
@@ -155,12 +180,12 @@ export default function ShowcaseLandingPage() {
 const styles: Record<string, React.CSSProperties> = {
   page: {
     minHeight: '100vh',
+    paddingBottom: '80px',
   },
   hero: {
-    padding: '64px 0 48px',
-    background: 'radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.15) 0%, rgba(5, 8, 20, 0) 70%)',
-    borderBottom: '1px solid #1E3368',
-    marginBottom: '32px',
+    padding: '80px 0 60px',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+    marginBottom: '48px',
   },
   heroContainer: {
     display: 'flex',
@@ -171,152 +196,173 @@ const styles: Record<string, React.CSSProperties> = {
   heroBadgeRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    marginBottom: '18px',
+    gap: '12px',
+    marginBottom: '24px',
     flexWrap: 'wrap',
     justifyContent: 'center',
   },
   heroBadge: {
-    backgroundColor: 'rgba(245, 158, 11, 0.15)',
-    border: '1px solid rgba(245, 158, 11, 0.4)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+    border: '1px solid rgba(245, 158, 11, 0.35)',
     color: '#FBBF24',
-    borderRadius: '20px',
-    padding: '4px 12px',
+    borderRadius: '24px',
+    padding: '6px 14px',
     fontSize: '11px',
     fontWeight: '800',
     letterSpacing: '0.8px',
+    fontFamily: 'var(--font-mono)',
+  },
+  liveDot: {
+    width: '7px',
+    height: '7px',
+    borderRadius: '50%',
+    backgroundColor: '#FBBF24',
+    boxShadow: '0 0 8px #FBBF24',
   },
   verifiedTag: {
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
-    border: '1px solid rgba(16, 185, 129, 0.4)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    border: '1px solid rgba(16, 185, 129, 0.35)',
     color: '#10B981',
-    borderRadius: '20px',
-    padding: '4px 12px',
+    borderRadius: '24px',
+    padding: '6px 14px',
     fontSize: '11px',
     fontWeight: '700',
+    fontFamily: 'var(--font-mono)',
   },
   heroTitle: {
     color: '#F8FAFC',
-    fontSize: 'clamp(28px, 4.5vw, 44px)',
+    fontSize: 'clamp(32px, 5.5vw, 54px)',
     fontWeight: '800',
-    lineHeight: 1.2,
-    maxWidth: '920px',
-    marginBottom: '18px',
-    letterSpacing: '-0.5px',
+    lineHeight: 1.15,
+    maxWidth: '960px',
+    marginBottom: '20px',
+    letterSpacing: '-1px',
   },
   heroDesc: {
     color: '#94A3B8',
-    fontSize: 'clamp(14px, 1.8vw, 16px)',
-    lineHeight: 1.6,
-    maxWidth: '780px',
-    marginBottom: '28px',
+    fontSize: 'clamp(15px, 2vw, 17px)',
+    lineHeight: 1.7,
+    maxWidth: '820px',
+    marginBottom: '36px',
   },
   ctaRow: {
     display: 'flex',
     gap: '14px',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    marginBottom: '40px',
+    marginBottom: '48px',
   },
   ctaPrimary: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-    backgroundColor: '#2563EB',
+    gap: '10px',
+    background: 'linear-gradient(135deg, #2563EB 0%, #06B6D4 100%)',
     color: '#FFFFFF',
     fontWeight: '700',
     fontSize: '13px',
-    padding: '12px 22px',
-    borderRadius: '10px',
-    boxShadow: '0 0 20px rgba(37, 99, 235, 0.5)',
+    padding: '14px 26px',
+    borderRadius: '12px',
+    boxShadow: '0 6px 24px rgba(37, 99, 235, 0.4)',
     letterSpacing: '0.5px',
+    transition: 'all 0.2s ease',
   },
   ctaSecondary: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-    backgroundColor: '#101C3D',
-    border: '1px solid #1E3368',
+    gap: '10px',
+    backgroundColor: 'rgba(30, 41, 59, 0.7)',
+    border: '1px solid rgba(255, 255, 255, 0.12)',
     color: '#F8FAFC',
     fontWeight: '700',
     fontSize: '13px',
-    padding: '12px 20px',
-    borderRadius: '10px',
+    padding: '14px 24px',
+    borderRadius: '12px',
     letterSpacing: '0.5px',
+    transition: 'all 0.2s ease',
   },
   ctaOutline: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: '10px',
     backgroundColor: 'transparent',
-    border: '1px solid #06B6D4',
-    color: '#38BDF8',
+    border: '1px solid rgba(245, 158, 11, 0.4)',
+    color: '#FBBF24',
     fontWeight: '700',
     fontSize: '13px',
-    padding: '12px 20px',
-    borderRadius: '10px',
+    padding: '14px 22px',
+    borderRadius: '12px',
     letterSpacing: '0.5px',
+    transition: 'all 0.2s ease',
   },
   quickBar: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#101C3D',
-    border: '1px solid #1E3368',
-    borderRadius: '16px',
-    padding: '16px 32px',
-    gap: '24px',
+    gap: '36px',
+    padding: '20px 48px',
+    borderRadius: '20px',
     flexWrap: 'wrap',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
   },
   quickMetric: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    minWidth: '100px',
   },
   quickValue: {
-    color: '#F8FAFC',
-    fontSize: '22px',
+    fontSize: '32px',
     fontWeight: '800',
+    letterSpacing: '-1px',
+    fontFamily: 'var(--font-mono)',
   },
   quickLabel: {
-    color: '#06B6D4',
-    fontSize: '10px',
-    fontWeight: '800',
-    letterSpacing: '0.8px',
-    marginTop: '2px',
+    color: '#64748B',
+    fontSize: '11px',
+    fontWeight: '700',
+    letterSpacing: '1px',
+    marginTop: '4px',
+    fontFamily: 'var(--font-mono)',
   },
   quickDivider: {
     width: '1px',
-    height: '32px',
-    backgroundColor: '#1E3368',
+    height: '36px',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
   section: {
-    marginBottom: '48px',
+    margin: '48px 0',
   },
   closingSection: {
-    backgroundColor: '#101C3D',
-    borderRadius: '20px',
-    border: '1px solid #1E3368',
-    padding: '36px',
-    margin: '48px 0 32px',
-    boxShadow: '0 8px 28px rgba(0, 0, 0, 0.4)',
+    padding: '40px',
+    borderRadius: '24px',
+    margin: '64px 0 32px',
   },
   closingHeader: {
-    marginBottom: '24px',
+    textAlign: 'center',
+    marginBottom: '32px',
   },
   closingPre: {
-    color: '#06B6D4',
+    color: '#00F0FF',
     fontSize: '11px',
     fontWeight: '800',
-    letterSpacing: '1px',
+    letterSpacing: '1.2px',
+    fontFamily: 'var(--font-mono)',
+    marginBottom: '6px',
   },
   closingTitle: {
     color: '#F8FAFC',
-    fontSize: '22px',
+    fontSize: '26px',
     fontWeight: '800',
-    marginTop: '4px',
+    letterSpacing: '-0.5px',
+  },
+  closingDesc: {
+    color: '#94A3B8',
+    fontSize: '14px',
+    marginTop: '6px',
   },
   closingGrid: {
     display: 'grid',
@@ -324,24 +370,38 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '24px',
   },
   closingCard: {
-    backgroundColor: '#1C2E60',
-    borderRadius: '14px',
-    padding: '24px',
-    border: '1px solid rgba(45, 75, 148, 0.4)',
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    borderRadius: '16px',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    padding: '28px',
+  },
+  closingCardHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '18px',
+  },
+  closingCardIcon: {
+    width: '38px',
+    height: '38px',
+    borderRadius: '10px',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   closingCardTitle: {
-    color: '#FBBF24',
-    fontSize: '16px',
+    color: '#F8FAFC',
+    fontSize: '17px',
     fontWeight: '700',
-    marginBottom: '14px',
   },
   closingList: {
-    paddingLeft: '18px',
-    color: '#CBD5E1',
-    fontSize: '13px',
-    lineHeight: 1.7,
+    listStyle: 'none',
     display: 'flex',
     flexDirection: 'column',
-    gap: '10px',
+    gap: '14px',
+    color: '#94A3B8',
+    fontSize: '13px',
+    lineHeight: 1.6,
   },
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -81,6 +81,23 @@ function NavigationGuard() {
 }
 
 export default function RootLayout() {
+  const isWeb = Platform.OS === 'web';
+
+  if (isWeb) {
+    return (
+      <View style={styles.webOuterContainer}>
+        <View style={styles.webFrame}>
+          <SafeAreaProvider>
+            <AuthProvider>
+              <StatusBar style="light" />
+              <NavigationGuard />
+            </AuthProvider>
+          </SafeAreaProvider>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaProvider>
       <AuthProvider>
@@ -92,6 +109,30 @@ export default function RootLayout() {
 }
 
 const styles = StyleSheet.create({
+  webOuterContainer: {
+    flex: 1,
+    backgroundColor: '#030712',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '100vh' as unknown as number,
+    padding: 16,
+  },
+  webFrame: {
+    width: '100%',
+    maxWidth: 420,
+    height: '100%',
+    maxHeight: 880,
+    backgroundColor: COLORS.backgroundDeep,
+    borderRadius: 36,
+    borderWidth: 1.5,
+    borderColor: 'rgba(56, 189, 248, 0.4)',
+    overflow: 'hidden',
+    shadowColor: '#00F0FF',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 25,
+    elevation: 20,
+  },
   splashContainer: {
     flex: 1,
     backgroundColor: COLORS.backgroundDeep,

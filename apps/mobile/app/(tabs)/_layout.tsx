@@ -1,7 +1,8 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { View, Text, StyleSheet } from 'react-native';
-import { COLORS, TYPOGRAPHY } from '../../src/theme';
+import { StyleSheet, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { COLORS } from '../../src/theme';
 
 export default function TabLayout() {
   return (
@@ -10,7 +11,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: styles.tabBar,
         tabBarActiveTintColor: COLORS.brandCyanLight,
-        tabBarInactiveTintColor: COLORS.textMuted,
+        tabBarInactiveTintColor: '#64748B',
         tabBarLabelStyle: styles.tabLabel,
       }}
     >
@@ -20,9 +21,7 @@ export default function TabLayout() {
           title: 'Home',
           tabBarLabel: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.iconContainer, focused && styles.activeIconBox]}>
-              <Text style={[styles.iconGlyph, { color }]}>☖</Text>
-            </View>
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -30,11 +29,9 @@ export default function TabLayout() {
         name="scoreboard"
         options={{
           title: 'Scoreboard',
-          tabBarLabel: 'Scores',
+          tabBarLabel: 'Scoreboard',
           tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.iconContainer, focused && styles.activeIconBox]}>
-              <Text style={[styles.iconGlyph, { color }]}>★</Text>
-            </View>
+            <Ionicons name={focused ? 'trophy' : 'trophy-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -44,9 +41,7 @@ export default function TabLayout() {
           title: 'Journey',
           tabBarLabel: 'Journey',
           tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.iconContainer, focused && styles.activeIconBox]}>
-              <Text style={[styles.iconGlyph, { color }]}>⚡</Text>
-            </View>
+            <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -56,9 +51,7 @@ export default function TabLayout() {
           title: 'Team',
           tabBarLabel: 'Team',
           tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.iconContainer, focused && styles.activeIconBox]}>
-              <Text style={[styles.iconGlyph, { color }]}>👥</Text>
-            </View>
+            <Ionicons name={focused ? 'people' : 'people-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -66,11 +59,9 @@ export default function TabLayout() {
         name="workspace"
         options={{
           title: 'Workspace',
-          tabBarLabel: 'More',
+          tabBarLabel: 'Workspace',
           tabBarIcon: ({ color, focused }) => (
-            <View style={[styles.iconContainer, focused && styles.activeIconBox]}>
-              <Text style={[styles.iconGlyph, { color }]}>☰</Text>
-            </View>
+            <Ionicons name={focused ? 'grid' : 'grid-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -80,28 +71,17 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: COLORS.backgroundDeep,
+    backgroundColor: 'rgba(11, 17, 32, 0.95)',
     borderTopWidth: 1,
-    borderTopColor: COLORS.borderSubtle,
-    height: 64,
-    paddingBottom: 8,
-    paddingTop: 6,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+    height: Platform.OS === 'ios' ? 84 : 64,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 8,
+    paddingTop: 8,
   },
   tabLabel: {
     fontSize: 10,
     fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  iconContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 2,
-  },
-  activeIconBox: {
-    transform: [{ scale: 1.1 }],
-  },
-  iconGlyph: {
-    fontSize: 18,
-    fontWeight: '800',
+    letterSpacing: 0.4,
+    marginTop: 2,
   },
 });

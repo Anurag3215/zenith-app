@@ -1,14 +1,14 @@
 export const COLORS = {
-  // Backgrounds
-  backgroundDeep: '#050814',
-  backgroundNavy: '#0A1128',
-  surfaceCard: '#101C3D',
-  surfaceCardHover: '#15244C',
-  surfaceElevated: '#1C2E60',
+  // Backgrounds - Modern Obsidian & Deep Slate
+  backgroundDeep: '#030712',
+  backgroundNavy: '#0B1120',
+  surfaceCard: '#0F172A',
+  surfaceCardHover: '#1E293B',
+  surfaceElevated: '#1E293B',
 
-  // Borders & Dividers
-  borderSubtle: '#1E3368',
-  borderAccent: '#2D4B94',
+  // Borders & Dividers - Refined & Translucent
+  borderSubtle: 'rgba(255, 255, 255, 0.08)',
+  borderAccent: 'rgba(56, 189, 248, 0.3)',
   borderHighlight: '#38BDF8',
 
   // Primary Brand Accents
@@ -17,8 +17,8 @@ export const COLORS = {
   brandElectricSoft: 'rgba(37, 99, 235, 0.15)',
 
   // Secondary Data Accents
-  brandCyan: '#06B6D4',
-  brandCyanLight: '#22D3EE',
+  brandCyan: '#00F0FF',
+  brandCyanLight: '#38BDF8',
   brandCyanSoft: 'rgba(6, 182, 212, 0.15)',
 
   // Gold Competition Accents
@@ -28,7 +28,7 @@ export const COLORS = {
 
   // Metallic Podium Tones
   podiumGold: '#F59E0B',
-  podiumSilver: '#94A3B8',
+  podiumSilver: '#38BDF8',
   podiumBronze: '#D97706',
 
   // Semantic States
@@ -45,7 +45,7 @@ export const COLORS = {
   textPrimary: '#F8FAFC',
   textSecondary: '#94A3B8',
   textMuted: '#64748B',
-  textInverse: '#050814',
+  textInverse: '#030712',
   textGold: '#FDE68A',
   textCyan: '#67E8F9',
 } as const;

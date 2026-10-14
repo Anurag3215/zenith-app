@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { getPublicShowcaseData } from '../../lib/publicData';
 import { calculateGrowthMetrics } from '../../lib/metrics';
+import { PresentationIcon } from '../../components/Icons';
 
 export default function PresentationModePage() {
   const [slide, setSlide] = useState<number>(1);
@@ -36,14 +37,28 @@ export default function PresentationModePage() {
 
   return (
     <div style={styles.presentationWrapper}>
+      {/* Top Animated Progress Bar */}
+      <div style={{ height: '3px', width: '100%', backgroundColor: 'rgba(255, 255, 255, 0.08)' }}>
+        <div
+          style={{
+            height: '100%',
+            width: `${(slide / totalSlides) * 100}%`,
+            background: 'linear-gradient(90deg, #2563EB 0%, #00F0FF 100%)',
+            boxShadow: '0 0 10px #00F0FF',
+            transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
+        />
+      </div>
+
       {/* Top Bar Navigation */}
       <div style={styles.topBar}>
         <Link href="/" style={styles.returnBtn}>
           <span>←</span>
-          <span>RETURN TO SHOWCASE OVERVIEW</span>
+          <span>RETURN TO OVERVIEW</span>
         </Link>
 
         <div style={styles.presentationTag}>
+          <PresentationIcon size={14} color="#00F0FF" />
           <span>PROJECTOR PRESENTATION MODE</span>
           <span style={styles.slideCounter}>
             SLIDE {slide} OF {totalSlides}
@@ -56,22 +71,23 @@ export default function PresentationModePage() {
             disabled={slide === 1}
             style={{
               ...styles.navBtn,
-              opacity: slide === 1 ? 0.4 : 1,
+              opacity: slide === 1 ? 0.3 : 1,
             }}
             aria-label="Previous Slide"
           >
-            ◀ PREV
+            PREV
           </button>
           <button
             onClick={nextSlide}
             disabled={slide === totalSlides}
             style={{
               ...styles.navBtn,
-              opacity: slide === totalSlides ? 0.4 : 1,
+              ...styles.navBtnPrimary,
+              opacity: slide === totalSlides ? 0.3 : 1,
             }}
             aria-label="Next Slide"
           >
-            NEXT ▶
+            NEXT
           </button>
         </div>
       </div>
@@ -363,14 +379,21 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '8px',
   },
   navBtn: {
-    backgroundColor: '#1C2E60',
-    border: '1px solid #2D4B94',
+    backgroundColor: 'rgba(30, 41, 59, 0.7)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
     color: '#F8FAFC',
-    padding: '6px 12px',
-    borderRadius: '6px',
+    padding: '8px 16px',
+    borderRadius: '8px',
     fontSize: '11px',
     fontWeight: '700',
     cursor: 'pointer',
+    fontFamily: 'var(--font-mono)',
+  },
+  navBtnPrimary: {
+    background: 'linear-gradient(135deg, #2563EB 0%, #06B6D4 100%)',
+    border: '1px solid rgba(56, 189, 248, 0.4)',
+    color: '#FFFFFF',
+    boxShadow: '0 0 14px rgba(37, 99, 235, 0.4)',
   },
   canvas: {
     flex: 1,
@@ -382,11 +405,11 @@ const styles: Record<string, React.CSSProperties> = {
   slideContent: {
     maxWidth: '1100px',
     width: '100%',
-    backgroundColor: '#101C3D',
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',
     borderRadius: '24px',
-    border: '1px solid #1E3368',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
     padding: '48px',
-    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.5)',
+    boxShadow: '0 20px 50px -10px rgba(0, 0, 0, 0.7)',
   },
   slideCategory: {
     color: '#06B6D4',

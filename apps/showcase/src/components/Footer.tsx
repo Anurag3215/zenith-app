@@ -6,7 +6,10 @@ export const Footer: React.FC = () => {
       <div className="container" style={styles.inner}>
         <div style={styles.top}>
           <div>
-            <div style={styles.brand}>ZENITH • TEAM NO. 5</div>
+            <div style={styles.brandRow}>
+              <span style={styles.brand}>ZENITH</span>
+              <span style={styles.badge}>TEAM NO. 05</span>
+            </div>
             <div style={styles.subtext}>
               Official Showcase for the mPOWER Placement Training Program. Built with native cross-platform architecture and certified backend persistence.
             </div>
@@ -24,9 +27,9 @@ export const Footer: React.FC = () => {
             © 2026 ZENITH — Team No. 5. Developed for Evaluator Review & Placement Assessment.
           </div>
           <div style={styles.links}>
-            <span>Security Model: Zero-Trust RLS</span>
-            <span>•</span>
-            <span>Realtime Engine: PostgreSQL CDC</span>
+            <span style={styles.metaBadge}>Zero-Trust RLS</span>
+            <span style={styles.metaBadge}>Realtime CDC</span>
+            <span style={styles.metaBadge}>1224 Tie Logic</span>
           </div>
         </div>
       </div>
@@ -36,68 +39,96 @@ export const Footer: React.FC = () => {
 
 const styles: Record<string, React.CSSProperties> = {
   footer: {
-    backgroundColor: '#050814',
-    borderTop: '1px solid #1E3368',
-    padding: '48px 0 32px',
-    marginTop: '64px',
+    backgroundColor: '#020617',
+    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+    padding: '56px 0 36px',
+    marginTop: '80px',
+    position: 'relative',
+    zIndex: 1,
   },
   inner: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '32px',
+    gap: '36px',
   },
   top: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-    gap: '32px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+    gap: '36px',
+    alignItems: 'start',
+  },
+  brandRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    marginBottom: '10px',
   },
   brand: {
-    color: '#38BDF8',
+    color: '#F8FAFC',
     fontWeight: '800',
-    fontSize: '14px',
+    fontSize: '18px',
     letterSpacing: '1px',
-    marginBottom: '8px',
+  },
+  badge: {
+    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(251, 191, 36, 0.1) 100%)',
+    color: '#FBBF24',
+    border: '1px solid rgba(245, 158, 11, 0.35)',
+    borderRadius: '6px',
+    padding: '2px 8px',
+    fontSize: '10px',
+    fontWeight: '800',
+    letterSpacing: '0.6px',
+    fontFamily: 'var(--font-mono)',
   },
   subtext: {
     color: '#94A3B8',
-    fontSize: '12px',
+    fontSize: '13px',
     lineHeight: 1.6,
-    maxWidth: '480px',
+    maxWidth: '520px',
   },
   disclaimerBox: {
-    backgroundColor: 'rgba(16, 28, 61, 0.5)',
-    border: '1px solid #1E3368',
-    borderRadius: '10px',
-    padding: '16px',
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    borderRadius: '14px',
+    padding: '20px',
   },
   disclaimerTitle: {
     color: '#FBBF24',
     fontSize: '10px',
     fontWeight: '800',
     letterSpacing: '0.8px',
-    marginBottom: '6px',
+    marginBottom: '8px',
+    fontFamily: 'var(--font-mono)',
   },
   disclaimerText: {
     color: '#64748B',
-    fontSize: '11px',
-    lineHeight: 1.5,
+    fontSize: '12px',
+    lineHeight: 1.6,
   },
   bottom: {
-    borderTop: '1px solid rgba(30, 51, 104, 0.4)',
-    paddingTop: '20px',
+    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+    paddingTop: '24px',
     display: 'flex',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: '12px',
+    alignItems: 'center',
+    gap: '16px',
   },
   copyright: {
     color: '#64748B',
-    fontSize: '11px',
+    fontSize: '12px',
   },
   links: {
-    color: '#64748B',
-    fontSize: '11px',
     display: 'flex',
     gap: '8px',
+  },
+  metaBadge: {
+    backgroundColor: 'rgba(30, 41, 59, 0.5)',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    color: '#94A3B8',
+    borderRadius: '6px',
+    padding: '3px 8px',
+    fontSize: '11px',
+    fontFamily: 'var(--font-mono)',
   },
 };

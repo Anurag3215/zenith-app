@@ -1,5 +1,6 @@
 import React from 'react';
 import { GalleryItem } from '@zenith/shared';
+import { StarIcon } from './Icons';
 
 interface GallerySectionProps {
   items: GalleryItem[];
@@ -9,22 +10,39 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ items }) => {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <div>
-          <div style={styles.pre}>VISUAL ARCHIVE</div>
-          <h2 style={styles.title}>Showcase-Approved Milestones</h2>
+        <div style={styles.headerLeft}>
+          <div style={styles.iconBadge}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00F0FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+          </div>
+          <div>
+            <div style={styles.pre}>VISUAL ARCHIVE</div>
+            <h2 style={styles.title}>Showcase-Approved Milestones</h2>
+          </div>
         </div>
         <div style={styles.sub}>
-          Photographs capturing live cohort sprints, whiteboard design, and aptitude assessments.
+          Photographs capturing live cohort sprints, whiteboard architecture, and aptitude assessments.
         </div>
       </div>
 
       <div style={styles.grid}>
         {items.map((item) => (
-          <div key={item.id} style={styles.card}>
+          <div key={item.id} style={styles.card} className="glass-panel">
             <div style={styles.mediaBox}>
-              <div style={styles.icon}>📷</div>
+              <div style={styles.mediaPlaceholderIcon}>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
+              </div>
               <div style={styles.placeholderLabel}>Verified Training Moment</div>
-              <div style={styles.featuredBadge}>★ SHOWCASE FEATURED</div>
+              <div style={styles.featuredBadge}>
+                <StarIcon size={11} color="#FBBF24" />
+                <span>FEATURED</span>
+              </div>
               {item.day_number ? (
                 <div style={styles.dayBadge}>DAY 0{item.day_number}</div>
               ) : null}
@@ -50,56 +68,76 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ items }) => {
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    margin: '32px 0',
+    margin: '48px 0',
   },
   header: {
-    marginBottom: '20px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '16px',
+    marginBottom: '28px',
+  },
+  headerLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '14px',
+  },
+  iconBadge: {
+    width: '46px',
+    height: '46px',
+    borderRadius: '14px',
+    background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(56, 189, 248, 0.05) 100%)',
+    border: '1px solid rgba(6, 182, 212, 0.3)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   pre: {
-    color: '#06B6D4',
+    color: '#00F0FF',
     fontSize: '11px',
     fontWeight: '800',
-    letterSpacing: '1px',
+    letterSpacing: '1.2px',
+    fontFamily: 'var(--font-mono)',
   },
   title: {
     color: '#F8FAFC',
-    fontSize: '22px',
+    fontSize: '24px',
     fontWeight: '800',
+    letterSpacing: '-0.3px',
     marginTop: '2px',
   },
   sub: {
     color: '#94A3B8',
     fontSize: '12px',
-    marginTop: '4px',
   },
   grid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-    gap: '20px',
+    gap: '24px',
   },
   card: {
-    backgroundColor: '#101C3D',
-    borderRadius: '16px',
-    border: '1px solid #1E3368',
+    borderRadius: '20px',
     overflow: 'hidden',
-    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+    display: 'flex',
+    flexDirection: 'column',
   },
   mediaBox: {
-    height: '180px',
-    backgroundColor: '#1C2E60',
+    height: '190px',
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    borderBottom: '1px solid #1E3368',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+    background: 'radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.95) 100%)',
   },
-  icon: {
-    fontSize: '36px',
-    marginBottom: '6px',
+  mediaPlaceholderIcon: {
+    marginBottom: '8px',
   },
   placeholderLabel: {
-    color: '#94A3B8',
+    color: '#64748B',
     fontSize: '11px',
     fontStyle: 'italic',
   },
@@ -107,41 +145,47 @@ const styles: Record<string, React.CSSProperties> = {
     position: 'absolute',
     top: '12px',
     right: '12px',
-    backgroundColor: 'rgba(245, 158, 11, 0.2)',
-    border: '1px solid #FBBF24',
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    border: '1px solid rgba(245, 158, 11, 0.4)',
     color: '#FBBF24',
     borderRadius: '20px',
-    padding: '3px 8px',
-    fontSize: '9px',
+    padding: '3px 10px',
+    fontSize: '10px',
     fontWeight: '800',
-    letterSpacing: '0.5px',
+    letterSpacing: '0.6px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    fontFamily: 'var(--font-mono)',
   },
   dayBadge: {
     position: 'absolute',
     top: '12px',
     left: '12px',
-    backgroundColor: '#101C3D',
-    border: '1px solid #06B6D4',
+    backgroundColor: 'rgba(56, 189, 248, 0.15)',
+    border: '1px solid rgba(56, 189, 248, 0.35)',
     color: '#38BDF8',
     borderRadius: '6px',
     padding: '3px 8px',
-    fontSize: '9px',
+    fontSize: '10px',
     fontWeight: '800',
+    fontFamily: 'var(--font-mono)',
   },
   content: {
-    padding: '16px',
+    padding: '20px',
   },
   caption: {
     color: '#F8FAFC',
-    fontSize: '13px',
+    fontSize: '14px',
     fontWeight: '700',
     lineHeight: 1.5,
-    marginBottom: '6px',
+    marginBottom: '8px',
   },
   uploader: {
     color: '#64748B',
     fontSize: '11px',
-    marginBottom: '10px',
+    marginBottom: '12px',
+    fontFamily: 'var(--font-mono)',
   },
   tagsRow: {
     display: 'flex',
@@ -149,11 +193,12 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '6px',
   },
   tag: {
-    backgroundColor: '#1C2E60',
+    backgroundColor: 'rgba(30, 41, 59, 0.6)',
     color: '#38BDF8',
-    borderRadius: '4px',
-    padding: '2px 6px',
-    fontSize: '10px',
+    borderRadius: '6px',
+    padding: '3px 8px',
+    fontSize: '11px',
     fontWeight: '600',
+    fontFamily: 'var(--font-mono)',
   },
 };

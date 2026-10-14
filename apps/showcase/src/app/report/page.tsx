@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { getPublicShowcaseData } from '../../lib/publicData';
 import { calculateGrowthMetrics } from '../../lib/metrics';
+import { PrinterIcon } from '../../components/Icons';
 
 export default function ExecutiveReportPage() {
   const data = getPublicShowcaseData();
@@ -28,7 +29,7 @@ export default function ExecutiveReportPage() {
           </Link>
           <div style={styles.actionBtns}>
             <button onClick={handlePrint} style={styles.printBtn}>
-              <span>🖨️</span>
+              <PrinterIcon size={16} color="#FFFFFF" />
               <span>PRINT / SAVE AS PDF</span>
             </button>
           </div>
