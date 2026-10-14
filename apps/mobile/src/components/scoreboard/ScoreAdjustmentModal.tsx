@@ -18,7 +18,13 @@ interface ScoreAdjustmentModalProps {
   visible: boolean;
   group: ScoreboardGroup | null;
   onClose: () => void;
-  onSave: (groupId: string, delta: number, reason: string, category: string) => void;
+  onSave: (
+    groupId: string,
+    delta: number,
+    reason: string,
+    category: string,
+    expectedCurrentPoints: number
+  ) => Promise<void>;
 }
 
 export const ScoreAdjustmentModal: React.FC<ScoreAdjustmentModalProps> = ({
@@ -30,9 +36,14 @@ export const ScoreAdjustmentModal: React.FC<ScoreAdjustmentModalProps> = ({
   const [delta, setDelta] = useState<number>(25);
   const [reason, setReason] = useState<string>('');
   const [category, setCategory] = useState<string>('Technical Challenge');
+  const [isConfirming, setIsConfirming] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!group) return null;
+
+  const currentTotal = group.current_points;
+  const newTotal = currentTotal + delta;
 
   const categories = [
     'Technical Challenge',
@@ -44,19 +55,56 @@ export const ScoreAdjustmentModal: React.FC<ScoreAdjustmentModalProps> = ({
 
   const quickDeltas = [50, 25, 10, -10, -25, -50];
 
-  const handleSave = () => {
-    if (reason.trim().length < 3) {
-      setError('A valid justification is required for score audit logging.');
+  const handleValidateAndProceed = () => {
+    setError(null);
+
+    // Validation: Delta cannot be 0
+    if (delta === 0) {
+      setError('Score delta cannot be zero. Adjust the points up or down.');
       return;
     }
+
+    // Validation: Total points cannot be negative
+    if (newTotal < 0) {
+      setError(`Cumulative score cannot be negative. Resulting score would be ${newTotal} points.`);
+      return;
+    }
+
+    // Validation: Mandatory justification
+    if (!reason || reason.trim().length < 3) {
+      setError('A mandatory audit reason (minimum 3 characters) is required.');
+      return;
+    }
+
+    // Proceed to confirmation summary step
+    setIsConfirming(true);
+  };
+
+  const handleConfirmCommit = async () => {
+    setIsSubmitting(true);
     setError(null);
-    onSave(group.id, delta, reason, category);
-    setReason('');
+
+    try {
+      await onSave(group.id, delta, reason.trim(), category, group.current_points);
+      setIsConfirming(false);
+      setReason('');
+      onClose();
+    } catch (err: any) {
+      setError(err?.message || 'Error committing score to database.');
+      setIsConfirming(false);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleReset = () => {
+    setIsConfirming(false);
+    setError(null);
     onClose();
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={handleReset}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.overlay}
@@ -65,112 +113,180 @@ export const ScoreAdjustmentModal: React.FC<ScoreAdjustmentModalProps> = ({
           {/* Header */}
           <View style={styles.header}>
             <View>
-              <Text style={styles.title}>ADJUST COMPETITION SCORE</Text>
-              <Text style={styles.subtitle}>{group.group_name} (Current: {group.current_points} pts)</Text>
+              <Text style={styles.title}>
+                {isConfirming ? 'CONFIRM SCORE ADJUSTMENT' : 'ADJUST COMPETITION SCORE'}
+              </Text>
+              <Text style={styles.subtitle}>
+                {group.group_name} (Current: {group.current_points} pts)
+              </Text>
             </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Close modal">
+            <TouchableOpacity onPress={handleReset} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Close modal">
               <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
           </View>
 
           <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
-            {/* Delta Preview */}
-            <View style={styles.deltaDisplayCard}>
-              <Text style={styles.deltaLabel}>PROPOSED POINT ADJUSTMENT</Text>
-              <Text style={[styles.deltaBigText, delta >= 0 ? styles.posDelta : styles.negDelta]}>
-                {delta > 0 ? `+${delta}` : delta}
-              </Text>
-              <Text style={styles.newTotalSubtext}>
-                Resulting Score: {group.current_points + delta} points
-              </Text>
-            </View>
+            {error ? (
+              <View style={styles.errorAlertBox}>
+                <Text style={styles.errorIcon}>⚠</Text>
+                <Text style={styles.errorAlertText}>{error}</Text>
+              </View>
+            ) : null}
 
-            {/* Quick Delta Chips */}
-            <Text style={styles.sectionTitle}>QUICK INCREMENT / DECREMENT</Text>
-            <View style={styles.chipsRow}>
-              {quickDeltas.map((val) => (
-                <TouchableOpacity
-                  key={val}
-                  style={[
-                    styles.chip,
-                    delta === val && styles.chipActive,
-                    val < 0 && styles.chipNeg,
-                    val < 0 && delta === val && styles.chipNegActive,
-                  ]}
-                  onPress={() => setDelta(val)}
-                >
-                  <Text
-                    style={[
-                      styles.chipText,
-                      delta === val && styles.chipTextActive,
-                      val < 0 && styles.chipNegText,
-                    ]}
-                  >
-                    {val > 0 ? `+${val}` : val}
+            {isConfirming ? (
+              /* Confirmation Summary Step (Requirement 5) */
+              <View style={styles.confirmBox}>
+                <Text style={styles.confirmHeading}>AUDIT TRANSACTION PREVIEW</Text>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Competing Group:</Text>
+                  <Text style={styles.summaryVal}>{group.group_name} (Group {group.group_number})</Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Current Baseline:</Text>
+                  <Text style={styles.summaryVal}>{currentTotal} points</Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Applied Point Delta:</Text>
+                  <Text style={[styles.summaryVal, delta > 0 ? styles.posDelta : styles.negDelta]}>
+                    {delta > 0 ? `+${delta}` : delta} points
                   </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Resulting Total:</Text>
+                  <Text style={[styles.summaryVal, styles.highlightVal]}>{newTotal} points</Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Category:</Text>
+                  <Text style={styles.summaryVal}>{category}</Text>
+                </View>
+                <View style={[styles.summaryRow, { borderBottomWidth: 0 }]}>
+                  <Text style={styles.summaryLabel}>Audit Justification:</Text>
+                  <Text style={[styles.summaryVal, { fontStyle: 'italic' }]}>"{reason}"</Text>
+                </View>
 
-            {/* Category Selector */}
-            <Text style={styles.sectionTitle}>EVALUATION CATEGORY</Text>
-            <View style={styles.chipsRow}>
-              {categories.map((cat) => (
-                <TouchableOpacity
-                  key={cat}
-                  style={[styles.categoryChip, category === cat && styles.categoryChipActive]}
-                  onPress={() => setCategory(cat)}
-                >
-                  <Text
-                    style={[
-                      styles.categoryChipText,
-                      category === cat && styles.categoryChipTextActive,
-                    ]}
-                  >
-                    {cat}
+                <View style={styles.auditStampNotice}>
+                  <Text style={styles.stampIcon}>🔒</Text>
+                  <Text style={styles.stampText}>
+                    Optimistic concurrency check active. This action writes directly to the immutable PostgreSQL ledger.
                   </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+                </View>
+              </View>
+            ) : (
+              /* Input & Selection Step */
+              <>
+                {/* Resulting Score Card */}
+                <View style={styles.deltaDisplayCard}>
+                  <Text style={styles.deltaLabel}>PROPOSED RESULTING SCORE</Text>
+                  <Text style={[styles.deltaBigText, delta >= 0 ? styles.posDelta : styles.negDelta]}>
+                    {newTotal} <Text style={styles.ptsUnit}>pts</Text>
+                  </Text>
+                  <Text style={styles.newTotalSubtext}>
+                    Change: {delta > 0 ? `+${delta}` : delta} from current {currentTotal} pts
+                  </Text>
+                </View>
 
-            {/* Reason Field */}
-            <InputField
-              label="MANDATORY AUDIT REASON"
-              placeholder="e.g. Day 2 Coding Sprint Round 1 Winner"
-              value={reason}
-              onChangeText={(text) => {
-                setReason(text);
-                if (error) setError(null);
-              }}
-              error={error}
-              helperText="Every modification is logged with your member credentials in the audit ledger."
-            />
+                {/* Quick Delta Chips */}
+                <Text style={styles.sectionTitle}>INCREMENT / DECREMENT STEPPER</Text>
+                <View style={styles.chipsRow}>
+                  {quickDeltas.map((val) => (
+                    <TouchableOpacity
+                      key={val}
+                      style={[
+                        styles.chip,
+                        delta === val && styles.chipActive,
+                        val < 0 && styles.chipNeg,
+                        val < 0 && delta === val && styles.chipNegActive,
+                      ]}
+                      onPress={() => setDelta(val)}
+                    >
+                      <Text
+                        style={[
+                          styles.chipText,
+                          delta === val && styles.chipTextActive,
+                          val < 0 && styles.chipNegText,
+                        ]}
+                      >
+                        {val > 0 ? `+${val}` : val}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
 
-            {/* Audit Warning */}
-            <View style={styles.auditWarningBox}>
-              <Text style={styles.auditWarningIcon}>🔒</Text>
-              <Text style={styles.auditWarningText}>
-                STRICT RBAC NOTICE: Score adjustments are restricted to Captain and Vice-Captain roles. This operation creates an immutable transaction entry.
-              </Text>
-            </View>
+                {/* Category Selector */}
+                <Text style={styles.sectionTitle}>EVENT CATEGORY</Text>
+                <View style={styles.chipsRow}>
+                  {categories.map((cat) => (
+                    <TouchableOpacity
+                      key={cat}
+                      style={[styles.categoryChip, category === cat && styles.categoryChipActive]}
+                      onPress={() => setCategory(cat)}
+                    >
+                      <Text
+                        style={[
+                          styles.categoryChipText,
+                          category === cat && styles.categoryChipTextActive,
+                        ]}
+                      >
+                        {cat}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {/* Reason Input */}
+                <InputField
+                  label="MANDATORY AUDIT REASON"
+                  placeholder="e.g. Day 2 Coding Sprint Round 1 Winner"
+                  value={reason}
+                  onChangeText={(txt) => {
+                    setReason(txt);
+                    if (error) setError(null);
+                  }}
+                  helperText="Required for competition transparency and tamper verification."
+                />
+              </>
+            )}
           </ScrollView>
 
           {/* Footer Actions */}
           <View style={styles.footer}>
-            <Button
-              title="CANCEL"
-              onPress={onClose}
-              variant="outline"
-              size="md"
-              style={styles.actionBtn}
-            />
-            <Button
-              title="COMMIT SCORE"
-              onPress={handleSave}
-              variant="gold"
-              size="md"
-              style={styles.actionBtn}
-            />
+            {isConfirming ? (
+              <>
+                <Button
+                  title="← EDIT VALUES"
+                  onPress={() => setIsConfirming(false)}
+                  variant="outline"
+                  size="md"
+                  disabled={isSubmitting}
+                  style={styles.actionBtn}
+                />
+                <Button
+                  title="COMMIT TO DATABASE"
+                  onPress={handleConfirmCommit}
+                  variant="gold"
+                  size="md"
+                  loading={isSubmitting}
+                  style={styles.actionBtn}
+                />
+              </>
+            ) : (
+              <>
+                <Button
+                  title="CANCEL"
+                  onPress={handleReset}
+                  variant="outline"
+                  size="md"
+                  style={styles.actionBtn}
+                />
+                <Button
+                  title="REVIEW & CONFIRM →"
+                  onPress={handleValidateAndProceed}
+                  variant="gold"
+                  size="md"
+                  style={styles.actionBtn}
+                />
+              </>
+            )}
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -190,7 +306,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: RADII.xl,
     borderWidth: 1,
     borderColor: COLORS.borderAccent,
-    maxHeight: '90%',
+    maxHeight: '92%',
     paddingBottom: SPACING.xl,
     ...SHADOWS.card,
   },
@@ -230,6 +346,84 @@ const styles = StyleSheet.create({
   body: {
     padding: SPACING.lg,
   },
+  errorAlertBox: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderWidth: 1,
+    borderColor: COLORS.danger,
+    borderRadius: RADII.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  errorIcon: {
+    color: COLORS.danger,
+    marginRight: SPACING.sm,
+  },
+  errorAlertText: {
+    color: '#FCA5A5',
+    fontSize: TYPOGRAPHY.sizes.xs,
+    flex: 1,
+    lineHeight: 18,
+    fontWeight: '600',
+  },
+  confirmBox: {
+    backgroundColor: COLORS.surfaceCard,
+    borderRadius: RADII.lg,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.accentGold,
+    marginBottom: SPACING.md,
+  },
+  confirmHeading: {
+    color: COLORS.accentGoldBright,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1,
+    marginBottom: SPACING.md,
+    textAlign: 'center',
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: SPACING.xs + 2,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(30, 51, 104, 0.4)',
+  },
+  summaryLabel: {
+    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: '600',
+  },
+  summaryVal: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.sizes.xs,
+    fontWeight: '700',
+    maxWidth: '55%',
+    textAlign: 'right',
+  },
+  highlightVal: {
+    color: COLORS.brandCyanLight,
+    fontSize: TYPOGRAPHY.sizes.sm,
+    fontWeight: '800',
+  },
+  auditStampNotice: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+    borderRadius: RADII.md,
+    padding: SPACING.sm + 2,
+    marginTop: SPACING.md,
+    alignItems: 'center',
+  },
+  stampIcon: {
+    marginRight: SPACING.xs + 2,
+    fontSize: 14,
+  },
+  stampText: {
+    color: COLORS.brandCyanLight,
+    fontSize: 10,
+    flex: 1,
+    lineHeight: 14,
+  },
   deltaDisplayCard: {
     backgroundColor: COLORS.surfaceCard,
     borderRadius: RADII.lg,
@@ -249,6 +443,11 @@ const styles = StyleSheet.create({
     fontSize: 44,
     fontWeight: '800',
     marginVertical: SPACING.xs,
+  },
+  ptsUnit: {
+    fontSize: TYPOGRAPHY.sizes.md,
+    fontWeight: '700',
+    color: COLORS.textMuted,
   },
   posDelta: {
     color: COLORS.accentGoldBright,
@@ -327,25 +526,6 @@ const styles = StyleSheet.create({
   categoryChipTextActive: {
     color: COLORS.brandCyanLight,
     fontWeight: '700',
-  },
-  auditWarningBox: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(37, 99, 235, 0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(37, 99, 235, 0.25)',
-    borderRadius: RADII.md,
-    padding: SPACING.md,
-    marginBottom: SPACING.lg,
-  },
-  auditWarningIcon: {
-    marginRight: SPACING.sm,
-    fontSize: 16,
-  },
-  auditWarningText: {
-    color: COLORS.brandCyanLight,
-    fontSize: 11,
-    lineHeight: 16,
-    flex: 1,
   },
   footer: {
     flexDirection: 'row',

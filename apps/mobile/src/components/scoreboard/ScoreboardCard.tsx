@@ -1,11 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { ScoreboardGroup } from '@zenith/shared';
+import { RankedScoreboardGroup } from '@zenith/shared';
 import { COLORS, SPACING, RADII, TYPOGRAPHY, SHADOWS } from '../../theme';
-import { Badge } from '../common/Badge';
 
 interface ScoreboardCardProps {
-  group: ScoreboardGroup;
+  group: RankedScoreboardGroup;
   onPress?: () => void;
   canEdit?: boolean;
   onEditPress?: () => void;
@@ -20,11 +19,11 @@ export const ScoreboardCard: React.FC<ScoreboardCardProps> = ({
   const isOurTeam = group.is_current_team;
   const pointDelta = group.current_points - group.previous_points;
 
-  const getRankGlyph = (r: number) => {
-    if (r === 1) return '★ 1st';
-    if (r === 2) return '◈ 2nd';
-    if (r === 3) return '▲ 3rd';
-    return `#0${r}`;
+  const getRankGlyph = (r: number, isTied: boolean) => {
+    if (r === 1) return isTied ? '★ T-1st' : '★ 1st';
+    if (r === 2) return isTied ? '◈ T-2nd' : '◈ 2nd';
+    if (r === 3) return isTied ? '▲ T-3rd' : '▲ 3rd';
+    return isTied ? `T-#0${r}` : `#0${r}`;
   };
 
   return (
@@ -58,8 +57,21 @@ export const ScoreboardCard: React.FC<ScoreboardCardProps> = ({
                 group.rank === 3 && styles.rankTextBronze,
               ]}
             >
-              {getRankGlyph(group.rank)}
+              {getRankGlyph(group.rank, group.is_tied)}
             </Text>
+
+            {/* Authentic Rank Movement (from historical baseline) */}
+            {group.rank_movement !== null && group.rank_movement !== undefined ? (
+              <View style={styles.movementRow}>
+                {group.rank_movement > 0 ? (
+                  <Text style={styles.moveUp}>▲ +{group.rank_movement}</Text>
+                ) : group.rank_movement < 0 ? (
+                  <Text style={styles.moveDown}>▼ {group.rank_movement}</Text>
+                ) : (
+                  <Text style={styles.moveSame}>―</Text>
+                )}
+              </View>
+            ) : null}
           </View>
 
           <View style={styles.nameBlock}>
@@ -72,9 +84,14 @@ export const ScoreboardCard: React.FC<ScoreboardCardProps> = ({
                   <Text style={styles.ourBadgeText}>OUR SQUAD</Text>
                 </View>
               ) : null}
+              {group.is_tied ? (
+                <View style={styles.tieBadge}>
+                  <Text style={styles.tieBadgeText}>TIED</Text>
+                </View>
+              ) : null}
             </View>
             <Text style={styles.cohortSubtext}>
-              Group {group.group_number} • Cohort Standings
+              Group {group.group_number} • mPOWER Cohort
             </Text>
           </View>
         </View>
@@ -88,7 +105,7 @@ export const ScoreboardCard: React.FC<ScoreboardCardProps> = ({
         </View>
       </View>
 
-      {/* Bottom Bar: Modifiers & Delta */}
+      {/* Bottom Bar: Modifiers, Deltas, & Action */}
       <View style={styles.bottomRow}>
         <View style={styles.pillsRow}>
           {pointDelta > 0 ? (
@@ -176,7 +193,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surfaceElevated,
     borderWidth: 1,
     borderColor: COLORS.borderSubtle,
-    minWidth: 44,
+    minWidth: 52,
     alignItems: 'center',
     marginRight: SPACING.md,
   },
@@ -206,6 +223,23 @@ const styles = StyleSheet.create({
   rankTextBronze: {
     color: '#FDBA74',
   },
+  movementRow: {
+    marginTop: 2,
+  },
+  moveUp: {
+    color: COLORS.success,
+    fontSize: 9,
+    fontWeight: '800',
+  },
+  moveDown: {
+    color: COLORS.danger,
+    fontSize: 9,
+    fontWeight: '800',
+  },
+  moveSame: {
+    color: COLORS.textMuted,
+    fontSize: 9,
+  },
   nameBlock: {
     flex: 1,
   },
@@ -218,7 +252,7 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontSize: TYPOGRAPHY.sizes.md,
     fontWeight: '700',
-    marginRight: SPACING.sm,
+    marginRight: SPACING.xs + 2,
   },
   ourTeamText: {
     color: COLORS.brandCyanLight,
@@ -231,12 +265,26 @@ const styles = StyleSheet.create({
     borderRadius: RADII.sm,
     borderWidth: 1,
     borderColor: COLORS.brandCyan,
+    marginRight: SPACING.xs,
   },
   ourBadgeText: {
     color: COLORS.brandCyanLight,
     fontSize: 9,
     fontWeight: '800',
     letterSpacing: 0.5,
+  },
+  tieBadge: {
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    paddingHorizontal: SPACING.xs + 2,
+    paddingVertical: 2,
+    borderRadius: RADII.sm,
+    borderWidth: 1,
+    borderColor: COLORS.accentGold,
+  },
+  tieBadgeText: {
+    color: COLORS.accentGoldBright,
+    fontSize: 9,
+    fontWeight: '800',
   },
   cohortSubtext: {
     color: COLORS.textMuted,
