@@ -1,24 +1,23 @@
 import React from 'react';
 import Link from 'next/link';
-import { PresentationIcon, DocumentIcon } from './Icons';
+import { PresentationIcon, DocumentIcon, SparklesIcon } from './Icons';
 
 export const Header: React.FC = () => {
   return (
-    <header style={styles.header} className="no-print">
-      <div className="container" style={styles.inner}>
+    <header style={styles.headerWrapper} className="no-print">
+      <div style={styles.capsule}>
+        {/* Brand / Logo */}
         <Link href="/" style={styles.brand}>
           <div style={styles.logoBadge}>
-            <span style={styles.logoText}>Z5</span>
+            <SparklesIcon size={16} color="#C084FC" />
           </div>
-          <div>
-            <div style={styles.titleRow}>
-              <span style={styles.brandName}>ZENITH</span>
-              <span style={styles.teamTag}>TEAM 05</span>
-            </div>
-            <div style={styles.subBrand}>mPOWER Placement Training Program</div>
+          <div style={styles.brandTitleGroup}>
+            <span style={styles.brandName}>ZENITH</span>
+            <span style={styles.teamPill}>05</span>
           </div>
         </Link>
 
+        {/* Navigation links */}
         <nav style={styles.nav}>
           <Link href="/#scoreboard" style={styles.navLink}>
             Scoreboard
@@ -35,16 +34,20 @@ export const Header: React.FC = () => {
           <Link href="/#gallery" style={styles.navLink}>
             Gallery
           </Link>
+          <Link href="/#reflections" style={styles.navLink}>
+            Reflections
+          </Link>
         </nav>
 
+        {/* Action Buttons */}
         <div style={styles.actionGroup}>
-          <Link href="/report" style={styles.reportBtn}>
-            <DocumentIcon size={15} color="#94A3B8" />
-            <span>Executive Dossier</span>
+          <Link href="/report" style={styles.dossierBtn}>
+            <DocumentIcon size={14} color="#A5A6C4" />
+            <span>Dossier</span>
           </Link>
           <Link href="/present" style={styles.presentBtn}>
-            <PresentationIcon size={15} color="#FFFFFF" />
             <span>Presentation</span>
+            <span style={{ fontSize: '13px' }}>→</span>
           </Link>
         </div>
       </div>
@@ -53,114 +56,114 @@ export const Header: React.FC = () => {
 };
 
 const styles: Record<string, React.CSSProperties> = {
-  header: {
-    backgroundColor: 'rgba(3, 7, 18, 0.85)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+  headerWrapper: {
     position: 'sticky',
-    top: 0,
+    top: '16px',
     zIndex: 100,
-    transition: 'all 0.2s ease',
+    width: '100%',
+    padding: '0 1rem',
+    display: 'flex',
+    justifyContent: 'center',
+    pointerEvents: 'none',
   },
-  inner: {
+  capsule: {
+    pointerEvents: 'auto',
+    width: '100%',
+    maxWidth: '1060px',
+    height: '62px',
+    backgroundColor: 'rgba(18, 10, 40, 0.75)',
+    backdropFilter: 'blur(24px) saturate(180%)',
+    WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+    borderRadius: '9999px',
+    border: '1px solid rgba(168, 85, 247, 0.28)',
+    boxShadow: '0 16px 36px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: '74px',
+    padding: '0 12px 0 20px',
+    transition: 'all 0.2s ease',
   },
   brand: {
     display: 'flex',
     alignItems: 'center',
-    gap: '14px',
+    gap: '10px',
+    textDecoration: 'none',
   },
   logoBadge: {
-    width: '42px',
-    height: '42px',
-    borderRadius: '12px',
-    background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)',
-    border: '1px solid rgba(56, 189, 248, 0.4)',
+    width: '34px',
+    height: '34px',
+    borderRadius: '10px',
+    background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(236, 72, 153, 0.15) 100%)',
+    border: '1px solid rgba(168, 85, 247, 0.45)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 0 20px -3px rgba(56, 189, 248, 0.3)',
+    boxShadow: '0 0 16px -2px rgba(168, 85, 247, 0.4)',
   },
-  logoText: {
-    background: 'linear-gradient(135deg, #38BDF8 0%, #00F0FF 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    fontWeight: '800',
-    fontSize: '15px',
-    letterSpacing: '1px',
-    fontFamily: 'var(--font-mono)',
-  },
-  titleRow: {
+  brandTitleGroup: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: '6px',
   },
   brandName: {
-    color: '#F8FAFC',
+    color: '#FFFFFF',
     fontWeight: '800',
-    fontSize: '19px',
-    letterSpacing: '1px',
+    fontSize: '17px',
+    letterSpacing: '0.8px',
   },
-  teamTag: {
-    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(251, 191, 36, 0.1) 100%)',
-    color: '#FBBF24',
-    border: '1px solid rgba(245, 158, 11, 0.35)',
-    borderRadius: '6px',
-    padding: '2px 8px',
+  teamPill: {
+    background: 'rgba(168, 85, 247, 0.2)',
+    border: '1px solid rgba(168, 85, 247, 0.35)',
+    color: '#E9D5FF',
+    borderRadius: '9999px',
+    padding: '1px 7px',
     fontSize: '10px',
     fontWeight: '800',
     letterSpacing: '0.5px',
   },
-  subBrand: {
-    color: '#64748B',
-    fontSize: '11px',
-    fontWeight: '500',
-    marginTop: '1px',
-  },
   nav: {
     display: 'flex',
-    gap: '28px',
+    gap: '22px',
     alignItems: 'center',
   },
   navLink: {
-    color: '#94A3B8',
+    color: '#A5A6C4',
     fontSize: '13px',
-    fontWeight: '600',
+    fontWeight: '500',
     transition: 'color 0.15s ease',
+    textDecoration: 'none',
   },
   actionGroup: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: '8px',
   },
-  reportBtn: {
+  dossierBtn: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-    padding: '9px 16px',
-    borderRadius: '10px',
-    backgroundColor: 'rgba(30, 41, 59, 0.6)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    color: '#F8FAFC',
-    fontSize: '13px',
+    gap: '6px',
+    padding: '8px 14px',
+    borderRadius: '9999px',
+    backgroundColor: 'rgba(28, 16, 60, 0.6)',
+    border: '1px solid rgba(168, 85, 247, 0.25)',
+    color: '#E2E8F0',
+    fontSize: '12px',
     fontWeight: '600',
     transition: 'all 0.2s ease',
+    textDecoration: 'none',
   },
   presentBtn: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-    padding: '9px 18px',
-    borderRadius: '10px',
-    background: 'linear-gradient(135deg, #2563EB 0%, #06B6D4 100%)',
+    gap: '6px',
+    padding: '8px 18px',
+    borderRadius: '9999px',
+    background: 'linear-gradient(90deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%)',
     color: '#FFFFFF',
-    fontSize: '13px',
+    fontSize: '12px',
     fontWeight: '700',
-    boxShadow: '0 4px 18px rgba(37, 99, 235, 0.4)',
+    boxShadow: '0 2px 18px rgba(139, 92, 246, 0.5)',
     transition: 'all 0.2s ease',
+    textDecoration: 'none',
   },
 };

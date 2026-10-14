@@ -38,13 +38,13 @@ export default function PresentationModePage() {
   return (
     <div style={styles.presentationWrapper}>
       {/* Top Animated Progress Bar */}
-      <div style={{ height: '3px', width: '100%', backgroundColor: 'rgba(255, 255, 255, 0.08)' }}>
+      <div style={{ height: '3px', width: '100%', backgroundColor: 'rgba(168, 85, 247, 0.15)' }}>
         <div
           style={{
             height: '100%',
             width: `${(slide / totalSlides) * 100}%`,
-            background: 'linear-gradient(90deg, #2563EB 0%, #00F0FF 100%)',
-            boxShadow: '0 0 10px #00F0FF',
+            background: 'linear-gradient(90deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%)',
+            boxShadow: '0 0 10px #EC4899',
             transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         />
@@ -58,7 +58,7 @@ export default function PresentationModePage() {
         </Link>
 
         <div style={styles.presentationTag}>
-          <PresentationIcon size={14} color="#00F0FF" />
+          <PresentationIcon size={14} color="#F472B6" />
           <span>PROJECTOR PRESENTATION MODE</span>
           <span style={styles.slideCounter}>
             SLIDE {slide} OF {totalSlides}
@@ -334,15 +334,15 @@ export default function PresentationModePage() {
 const styles: Record<string, React.CSSProperties> = {
   presentationWrapper: {
     minHeight: '100vh',
-    backgroundColor: '#050814',
-    color: '#F8FAFC',
+    backgroundColor: '#070318',
+    color: '#FFFFFF',
     display: 'flex',
     flexDirection: 'column',
   },
   topBar: {
     height: '64px',
-    backgroundColor: '#0A1128',
-    borderBottom: '1px solid #1E3368',
+    backgroundColor: '#0D0727',
+    borderBottom: '1px solid rgba(168, 85, 247, 0.25)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -352,7 +352,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
-    color: '#38BDF8',
+    color: '#F472B6',
     fontSize: '12px',
     fontWeight: '700',
     letterSpacing: '0.5px',
@@ -361,14 +361,15 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    color: '#94A3B8',
+    color: '#A5A6C4',
     fontSize: '11px',
     fontWeight: '700',
     letterSpacing: '0.8px',
   },
   slideCounter: {
-    backgroundColor: '#1C2E60',
-    color: '#FBBF24',
+    backgroundColor: 'rgba(168, 85, 247, 0.2)',
+    border: '1px solid rgba(168, 85, 247, 0.35)',
+    color: '#E9D5FF',
     padding: '3px 8px',
     borderRadius: '4px',
     fontSize: '10px',
@@ -379,9 +380,9 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '8px',
   },
   navBtn: {
-    backgroundColor: 'rgba(30, 41, 59, 0.7)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    color: '#F8FAFC',
+    backgroundColor: 'rgba(28, 16, 60, 0.7)',
+    border: '1px solid rgba(168, 85, 247, 0.25)',
+    color: '#FFFFFF',
     padding: '8px 16px',
     borderRadius: '8px',
     fontSize: '11px',
@@ -390,10 +391,10 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: 'var(--font-mono)',
   },
   navBtnPrimary: {
-    background: 'linear-gradient(135deg, #2563EB 0%, #06B6D4 100%)',
-    border: '1px solid rgba(56, 189, 248, 0.4)',
+    background: 'linear-gradient(90deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%)',
+    border: 'none',
     color: '#FFFFFF',
-    boxShadow: '0 0 14px rgba(37, 99, 235, 0.4)',
+    boxShadow: '0 0 16px rgba(139, 92, 246, 0.5)',
   },
   canvas: {
     flex: 1,
@@ -405,28 +406,28 @@ const styles: Record<string, React.CSSProperties> = {
   slideContent: {
     maxWidth: '1100px',
     width: '100%',
-    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    backgroundColor: 'rgba(20, 11, 46, 0.88)',
     borderRadius: '24px',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
+    border: '1px solid rgba(168, 85, 247, 0.25)',
     padding: '48px',
-    boxShadow: '0 20px 50px -10px rgba(0, 0, 0, 0.7)',
+    boxShadow: '0 20px 50px -10px rgba(0, 0, 0, 0.75)',
   },
   slideCategory: {
-    color: '#06B6D4',
+    color: '#F472B6',
     fontSize: '11px',
     fontWeight: '800',
     letterSpacing: '1.2px',
     marginBottom: '8px',
   },
   slideHeading: {
-    color: '#F8FAFC',
+    color: '#FFFFFF',
     fontSize: 'clamp(28px, 4vw, 42px)',
     fontWeight: '800',
     marginBottom: '8px',
     letterSpacing: '-0.5px',
   },
   slideSubhead: {
-    color: '#94A3B8',
+    color: '#A5A6C4',
     fontSize: '16px',
     marginBottom: '32px',
   },
@@ -437,13 +438,13 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '32px',
   },
   overviewCard: {
-    backgroundColor: '#1C2E60',
+    backgroundColor: 'rgba(28, 16, 60, 0.75)',
     borderRadius: '16px',
     padding: '24px',
-    border: '1px solid rgba(45, 75, 148, 0.5)',
+    border: '1px solid rgba(168, 85, 247, 0.25)',
   },
   cardHeaderSmall: {
-    color: '#06B6D4',
+    color: '#F472B6',
     fontSize: '10px',
     fontWeight: '800',
     letterSpacing: '0.8px',
@@ -456,24 +457,24 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '4px',
   },
   heroMeta: {
-    color: '#CBD5E1',
+    color: '#A5A6C4',
     fontSize: '12px',
   },
   coreMissionBox: {
-    backgroundColor: 'rgba(37, 99, 235, 0.12)',
-    border: '1px solid rgba(37, 99, 235, 0.35)',
+    backgroundColor: 'rgba(139, 92, 246, 0.15)',
+    border: '1px solid rgba(168, 85, 247, 0.35)',
     borderRadius: '12px',
     padding: '20px',
   },
   coreMissionTitle: {
-    color: '#38BDF8',
+    color: '#E9D5FF',
     fontSize: '11px',
     fontWeight: '800',
     letterSpacing: '0.8px',
     marginBottom: '4px',
   },
   coreMissionText: {
-    color: '#E2E8F0',
+    color: '#FFFFFF',
     fontSize: '14px',
     lineHeight: 1.6,
   },
@@ -484,10 +485,10 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '24px',
   },
   rosterSlideCard: {
-    backgroundColor: '#1C2E60',
+    backgroundColor: 'rgba(28, 16, 60, 0.75)',
     borderRadius: '10px',
     padding: '12px 16px',
-    border: '1px solid rgba(45, 75, 148, 0.4)',
+    border: '1px solid rgba(168, 85, 247, 0.25)',
   },
   rosterSlideHeader: {
     display: 'flex',
@@ -496,7 +497,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '8px',
   },
   rosterSlideName: {
-    color: '#F8FAFC',
+    color: '#FFFFFF',
     fontWeight: '700',
     fontSize: '13px',
   },
@@ -514,20 +515,20 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '4px',
   },
   skillPillSlide: {
-    backgroundColor: '#101C3D',
-    color: '#38BDF8',
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+    color: '#E9D5FF',
     padding: '2px 6px',
     borderRadius: '4px',
     fontSize: '9px',
     fontWeight: '600',
   },
   securityCallout: {
-    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-    border: '1px solid rgba(16, 185, 129, 0.3)',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    border: '1px solid rgba(16, 185, 129, 0.35)',
     borderRadius: '10px',
     padding: '12px 16px',
     fontSize: '12px',
-    color: '#E2E8F0',
+    color: '#FFFFFF',
   },
   journeySlideGrid: {
     display: 'grid',
@@ -535,10 +536,10 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '16px',
   },
   journeySlideCard: {
-    backgroundColor: '#1C2E60',
+    backgroundColor: 'rgba(28, 16, 60, 0.75)',
     borderRadius: '12px',
     padding: '18px',
-    border: '1px solid rgba(45, 75, 148, 0.4)',
+    border: '1px solid rgba(168, 85, 247, 0.25)',
   },
   journeySlideCardDone: {
     borderLeft: '4px solid #10B981',
@@ -549,7 +550,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '8px',
   },
   journeySlideDay: {
-    color: '#38BDF8',
+    color: '#F472B6',
     fontWeight: '800',
     fontSize: '11px',
   },
@@ -558,19 +559,19 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: '800',
   },
   journeySlideTitle: {
-    color: '#F8FAFC',
+    color: '#FFFFFF',
     fontWeight: '700',
     fontSize: '13px',
     marginBottom: '6px',
   },
   journeySlideDesc: {
-    color: '#94A3B8',
+    color: '#A5A6C4',
     fontSize: '11px',
     lineHeight: 1.5,
     marginBottom: '10px',
   },
   journeySlideOutcomes: {
-    backgroundColor: '#101C3D',
+    backgroundColor: 'rgba(20, 11, 46, 0.8)',
     borderRadius: '6px',
     padding: '8px',
     fontSize: '10px',
@@ -581,11 +582,11 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '4px',
   },
   outcomeLine: {
-    color: '#CBD5E1',
+    color: '#E2E8F0',
     marginBottom: '2px',
   },
   journeySlidePending: {
-    color: '#64748B',
+    color: '#71719A',
     fontSize: '10px',
     fontStyle: 'italic',
   },
@@ -595,8 +596,8 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '16px',
   },
   zenithHighlightBanner: {
-    backgroundColor: 'rgba(37, 99, 235, 0.15)',
-    border: '1px solid #2563EB',
+    backgroundColor: 'rgba(139, 92, 246, 0.18)',
+    border: '1px solid rgba(168, 85, 247, 0.5)',
     borderRadius: '14px',
     padding: '20px 24px',
     display: 'flex',
@@ -606,13 +607,13 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '12px',
   },
   highlightBadge: {
-    color: '#06B6D4',
+    color: '#F472B6',
     fontSize: '10px',
     fontWeight: '800',
     letterSpacing: '0.8px',
   },
   highlightName: {
-    color: '#F8FAFC',
+    color: '#FFFFFF',
     fontSize: '20px',
     fontWeight: '800',
     marginTop: '2px',
@@ -626,7 +627,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: '800',
   },
   highlightPoints: {
-    color: '#38BDF8',
+    color: '#F472B6',
     fontSize: '13px',
     fontWeight: '700',
   },
@@ -636,18 +637,18 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '8px',
   },
   compactRow: {
-    backgroundColor: '#1C2E60',
+    backgroundColor: 'rgba(28, 16, 60, 0.7)',
     borderRadius: '8px',
     padding: '10px 16px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     fontSize: '13px',
-    border: '1px solid rgba(45, 75, 148, 0.3)',
+    border: '1px solid rgba(168, 85, 247, 0.2)',
   },
   compactRowActive: {
-    backgroundColor: 'rgba(37, 99, 235, 0.25)',
-    border: '1px solid #2563EB',
+    backgroundColor: 'rgba(139, 92, 246, 0.25)',
+    border: '1px solid rgba(168, 85, 247, 0.6)',
   },
   compactRank: {
     width: '40px',
@@ -656,7 +657,7 @@ const styles: Record<string, React.CSSProperties> = {
   compactName: {
     flex: 1,
     fontWeight: '600',
-    color: '#E2E8F0',
+    color: '#FFFFFF',
   },
   compactPts: {
     fontWeight: '800',
@@ -668,10 +669,10 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '24px',
   },
   retroCard: {
-    backgroundColor: '#1C2E60',
+    backgroundColor: 'rgba(28, 16, 60, 0.75)',
     borderRadius: '16px',
     padding: '24px',
-    border: '1px solid rgba(45, 75, 148, 0.5)',
+    border: '1px solid rgba(168, 85, 247, 0.25)',
   },
   retroTitle: {
     color: '#FBBF24',
@@ -681,7 +682,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   retroList: {
     paddingLeft: '18px',
-    color: '#CBD5E1',
+    color: '#E2E8F0',
     fontSize: '13px',
     lineHeight: 1.7,
     display: 'flex',
@@ -690,8 +691,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   slideFooter: {
     height: '60px',
-    backgroundColor: '#0A1128',
-    borderTop: '1px solid #1E3368',
+    backgroundColor: '#070318',
+    borderTop: '1px solid rgba(168, 85, 247, 0.2)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -705,26 +706,26 @@ const styles: Record<string, React.CSSProperties> = {
     width: '12px',
     height: '12px',
     borderRadius: '50%',
-    backgroundColor: '#1E3368',
+    backgroundColor: 'rgba(168, 85, 247, 0.2)',
     border: 'none',
     cursor: 'pointer',
     padding: 0,
   },
   dotActive: {
-    backgroundColor: '#2563EB',
-    boxShadow: '0 0 8px rgba(37, 99, 235, 0.6)',
+    backgroundColor: '#A855F7',
+    boxShadow: '0 0 8px rgba(168, 85, 247, 0.7)',
   },
   keyboardTip: {
-    color: '#64748B',
+    color: '#71719A',
     fontSize: '11px',
   },
   kbd: {
-    backgroundColor: '#1C2E60',
-    color: '#F8FAFC',
+    backgroundColor: 'rgba(28, 16, 60, 0.7)',
+    color: '#FFFFFF',
     padding: '2px 6px',
     borderRadius: '4px',
     fontSize: '10px',
     fontFamily: 'monospace',
-    border: '1px solid #2D4B94',
+    border: '1px solid rgba(168, 85, 247, 0.25)',
   },
 };

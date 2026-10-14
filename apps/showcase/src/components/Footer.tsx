@@ -39,8 +39,8 @@ export const Footer: React.FC = () => {
 
 const styles: Record<string, React.CSSProperties> = {
   footer: {
-    backgroundColor: '#020617',
-    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+    backgroundColor: '#070318',
+    borderTop: '1px solid rgba(168, 85, 247, 0.2)',
     padding: '56px 0 36px',
     marginTop: '80px',
     position: 'relative',
@@ -64,7 +64,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '10px',
   },
   brand: {
-    color: '#F8FAFC',
+    color: '#FFFFFF',
     fontWeight: '800',
     fontSize: '18px',
     letterSpacing: '1px',
@@ -81,19 +81,19 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: 'var(--font-mono)',
   },
   subtext: {
-    color: '#94A3B8',
+    color: '#A5A6C4',
     fontSize: '13px',
     lineHeight: 1.6,
     maxWidth: '520px',
   },
   disclaimerBox: {
-    backgroundColor: 'rgba(15, 23, 42, 0.65)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(22, 12, 52, 0.65)',
+    border: '1px solid rgba(168, 85, 247, 0.2)',
     borderRadius: '14px',
     padding: '20px',
   },
   disclaimerTitle: {
-    color: '#FBBF24',
+    color: '#F472B6',
     fontSize: '10px',
     fontWeight: '800',
     letterSpacing: '0.8px',
@@ -101,12 +101,12 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: 'var(--font-mono)',
   },
   disclaimerText: {
-    color: '#64748B',
+    color: '#71719A',
     fontSize: '12px',
     lineHeight: 1.6,
   },
   bottom: {
-    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+    borderTop: '1px solid rgba(168, 85, 247, 0.15)',
     paddingTop: '24px',
     display: 'flex',
     flexWrap: 'wrap',
@@ -115,7 +115,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '16px',
   },
   copyright: {
-    color: '#64748B',
+    color: '#71719A',
     fontSize: '12px',
   },
   links: {
@@ -123,9 +123,9 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '8px',
   },
   metaBadge: {
-    backgroundColor: 'rgba(30, 41, 59, 0.5)',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    color: '#94A3B8',
+    backgroundColor: 'rgba(28, 16, 60, 0.6)',
+    border: '1px solid rgba(168, 85, 247, 0.2)',
+    color: '#E9D5FF',
     borderRadius: '6px',
     padding: '3px 8px',
     fontSize: '11px',

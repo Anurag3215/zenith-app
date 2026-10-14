@@ -1,41 +1,48 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Ultra-modern dark palette */
-  --bg-deep: #030712;
-  --bg-navy: #0B1120;
-  --bg-surface: #0F172A;
-  --surface-card: rgba(15, 23, 42, 0.75);
-  --surface-card-hover: rgba(30, 41, 59, 0.85);
-  --surface-elevated: #1E293B;
-  
-  /* Borders */
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-medium: rgba(255, 255, 255, 0.14);
-  --border-accent: rgba(56, 189, 248, 0.3);
-  --border-highlight: #38BDF8;
+  /* Cosmic Purple & Obsidian Slate Palette (Matching Reference Image) */
+  --bg-deep: #070318;
+  --bg-navy: #0D0727;
+  --bg-surface: #140C32;
+  --surface-card: rgba(20, 12, 50, 0.65);
+  --surface-card-hover: rgba(28, 16, 68, 0.75);
+  --surface-elevated: #1E1248;
+  --surface-glass: rgba(22, 13, 52, 0.65);
+  --surface-glass-border: rgba(168, 85, 247, 0.22);
 
-  /* Brand Accents */
-  --brand-electric: #2563EB;
-  --brand-electric-glow: #3B82F6;
-  --brand-cyan: #00F0FF;
-  --brand-cyan-light: #38BDF8;
+  /* Borders & Dividers */
+  --border-subtle: rgba(168, 85, 247, 0.18);
+  --border-medium: rgba(168, 85, 247, 0.35);
+  --border-accent: rgba(168, 85, 247, 0.5);
+  --border-highlight: #A855F7;
 
-  /* Accents */
+  /* Brand Accents - Vibrant Violet & Electric Gradient */
+  --brand-electric: #8B5CF6;
+  --brand-electric-glow: #A855F7;
+  --brand-cyan: #EC4899;
+  --brand-cyan-light: #F472B6;
+
+  /* Gradient Definitions */
+  --gradient-primary: linear-gradient(90deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%);
+  --gradient-pill: linear-gradient(90deg, #4338CA 0%, #7C3AED 50%, #D946EF 100%);
+  --gradient-glow: linear-gradient(135deg, rgba(168, 85, 247, 0.4) 0%, rgba(236, 72, 153, 0.2) 100%);
+
+  /* Competition Podium Accents */
   --accent-gold: #F59E0B;
   --accent-gold-bright: #FBBF24;
   --accent-gold-soft: rgba(245, 158, 11, 0.15);
 
   /* Typography Colors */
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A5A6C4;
+  --text-muted: #71719A;
   --text-gold: #FDE68A;
-  --text-cyan: #67E8F9;
+  --text-cyan: #F472B6;
 
   /* Status Colors */
   --success: #10B981;
-  --success-glow: rgba(16, 185, 129, 0.2);
+  --success-glow: rgba(16, 185, 129, 0.25);
   --danger: #EF4444;
 
   /* Font Families */
@@ -59,17 +66,23 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-image: 
+    linear-gradient(to right, rgba(147, 51, 234, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(147, 51, 234, 0.08) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: center top;
 }
 
-/* Background Atmosphere Glow */
+/* Background Atmosphere Glow - Central Violet Bloom */
 body::before {
   content: '';
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 600px;
-  background: radial-gradient(ellipse 70% 35% at 50% 0%, rgba(37, 99, 235, 0.18) 0%, rgba(6, 182, 212, 0.08) 50%, transparent 100%);
+  top: -150px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1200px;
+  height: 800px;
+  background: radial-gradient(ellipse 65% 50% at 50% 30%, rgba(139, 92, 246, 0.22) 0%, rgba(109, 40, 217, 0.1) 45%, transparent 75%);
   pointer-events: none;
   z-index: 0;
 }
@@ -90,56 +103,182 @@ button {
 }
 
 ::-webkit-scrollbar-track {
-  background: #030712;
+  background: #070318;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1E293B;
+  background: #1E1248;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #2D1B69;
 }
 
 /* Glassmorphism Card Utilities */
 .glass-panel {
   background: var(--surface-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--surface-glass-border);
+  border-radius: 20px;
+  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.65);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-panel:hover {
-  border-color: var(--border-medium);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+  border-color: rgba(168, 85, 247, 0.4);
+  box-shadow: 0 24px 50px -15px rgba(0, 0, 0, 0.75), 0 0 30px -10px rgba(168, 85, 247, 0.25);
+}
+
+/* Gradient Pill Action Buttons */
+.pill-btn-gradient {
+  background: var(--gradient-primary);
+  border-radius: 9999px;
+  color: #FFFFFF;
+  font-weight: 700;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 28px;
+  font-size: 14px;
+  box-shadow: 0 4px 25px rgba(139, 92, 246, 0.45);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.pill-btn-gradient:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.65);
+  filter: brightness(1.08);
+}
+
+.pill-btn-glass {
+  background: rgba(24, 14, 56, 0.75);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 9999px;
+  color: #F8FAFC;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 26px;
+  font-size: 14px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.pill-btn-glass:hover {
+  background: rgba(36, 20, 80, 0.85);
+  border-color: rgba(168, 85, 247, 0.55);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.25);
+}
+
+.hero-announcement-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 22px;
+  border-radius: 9999px;
+  background: rgba(30, 16, 60, 0.65);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+  color: #E9D5FF;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(16px);
+}
+
+/* Luminous Horizon Beam & Ambient Bloom (As seen above dashboard in reference) */
+.horizon-glow-wrapper {
+  position: relative;
+  width: 100%;
+  margin: 50px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.horizon-bloom {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 1000px;
+  height: 220px;
+  background: radial-gradient(ellipse at 50% 100%, rgba(168, 85, 247, 0.7) 0%, rgba(139, 92, 246, 0.25) 50%, transparent 80%);
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.horizon-beam {
+  position: relative;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 5%, #A855F7 25%, #FFFFFF 50%, #A855F7 75%, transparent 95%);
+  box-shadow: 0 0 25px #C084FC, 0 0 50px rgba(168, 85, 247, 0.8), 0 0 90px rgba(147, 51, 234, 0.5);
+  z-index: 2;
+}
+
+/* Wireframe Background Circles (as in reference image hero background) */
+.wireframe-circle-left {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  border: 1px solid rgba(168, 85, 247, 0.16);
+  top: 40px;
+  left: -80px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wireframe-circle-right {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  border: 1px solid rgba(168, 85, 247, 0.16);
+  top: 100px;
+  right: -100px;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.08) 0%, transparent 70%);
+  z-index: 0;
 }
 
 /* Glow Effects */
 .glow-cyan {
-  box-shadow: 0 0 20px -3px rgba(0, 240, 255, 0.35);
+  box-shadow: 0 0 24px -2px rgba(236, 72, 153, 0.45);
 }
 
 .glow-electric {
-  box-shadow: 0 0 24px -4px rgba(37, 99, 235, 0.5);
+  box-shadow: 0 0 24px -2px rgba(168, 85, 247, 0.5);
 }
 
 .glow-gold {
-  box-shadow: 0 0 20px -3px rgba(245, 158, 11, 0.35);
+  box-shadow: 0 0 24px -2px rgba(245, 158, 11, 0.45);
 }
 
-/* Metallic Text Gradients */
+/* Text Gradients */
 .gradient-text-white {
-  background: linear-gradient(180deg, #FFFFFF 20%, #94A3B8 100%);
+  background: linear-gradient(180deg, #FFFFFF 20%, #A5A6C4 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .gradient-text-cyan {
-  background: linear-gradient(135deg, #00F0FF 0%, #38BDF8 50%, #60A5FA 100%);
+  background: linear-gradient(135deg, #38BDF8 0%, #A855F7 50%, #EC4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -200,6 +339,7 @@ button {
   body {
     background-color: #FFFFFF !important;
     color: #0F172A !important;
+    background-image: none !important;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   }
 

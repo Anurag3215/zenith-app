@@ -1,35 +1,35 @@
 export const COLORS = {
-  // Backgrounds - Modern Obsidian & Deep Slate
-  backgroundDeep: '#030712',
-  backgroundNavy: '#0B1120',
-  surfaceCard: '#0F172A',
-  surfaceCardHover: '#1E293B',
-  surfaceElevated: '#1E293B',
+  // Backgrounds - Cosmic Obsidian & Deep Violet Slate (matching reference image)
+  backgroundDeep: '#070318',
+  backgroundNavy: '#0D0727',
+  surfaceCard: '#140C32',
+  surfaceCardHover: '#1E1248',
+  surfaceElevated: '#1F134A',
 
-  // Borders & Dividers - Refined & Translucent
-  borderSubtle: 'rgba(255, 255, 255, 0.08)',
-  borderAccent: 'rgba(56, 189, 248, 0.3)',
-  borderHighlight: '#38BDF8',
+  // Borders & Dividers - Violet Glass Hairlines
+  borderSubtle: 'rgba(168, 85, 247, 0.18)',
+  borderAccent: 'rgba(168, 85, 247, 0.38)',
+  borderHighlight: '#A855F7',
 
-  // Primary Brand Accents
-  brandElectric: '#2563EB',
-  brandElectricGlow: '#3B82F6',
-  brandElectricSoft: 'rgba(37, 99, 235, 0.15)',
+  // Primary Brand Accents - Vibrant Violet & Electric Indigo
+  brandElectric: '#8B5CF6',
+  brandElectricGlow: '#A855F7',
+  brandElectricSoft: 'rgba(139, 92, 246, 0.16)',
 
-  // Secondary Data Accents
-  brandCyan: '#00F0FF',
-  brandCyanLight: '#38BDF8',
-  brandCyanSoft: 'rgba(6, 182, 212, 0.15)',
+  // Secondary Accents - Neon Fuchsia / Pink (matches reference gradient)
+  brandCyan: '#EC4899',
+  brandCyanLight: '#F472B6',
+  brandCyanSoft: 'rgba(236, 72, 153, 0.16)',
 
-  // Gold Competition Accents
+  // Gold Competition Accents (Preserved for podium Rank 1 & medals)
   accentGold: '#F59E0B',
   accentGoldBright: '#FBBF24',
   accentGoldSoft: 'rgba(245, 158, 11, 0.15)',
 
   // Metallic Podium Tones
   podiumGold: '#F59E0B',
-  podiumSilver: '#38BDF8',
-  podiumBronze: '#D97706',
+  podiumSilver: '#C084FC',
+  podiumBronze: '#F472B6',
 
   // Semantic States
   success: '#10B981',
@@ -39,15 +39,15 @@ export const COLORS = {
   error: '#EF4444',
   warning: '#F97316',
   warningSoft: 'rgba(249, 115, 22, 0.15)',
-  info: '#38BDF8',
+  info: '#A855F7',
 
   // Typography
-  textPrimary: '#F8FAFC',
-  textSecondary: '#94A3B8',
-  textMuted: '#64748B',
-  textInverse: '#030712',
+  textPrimary: '#FFFFFF',
+  textSecondary: '#A5A6C4',
+  textMuted: '#71719A',
+  textInverse: '#070318',
   textGold: '#FDE68A',
-  textCyan: '#67E8F9',
+  textCyan: '#F472B6',
 } as const;
 
 export const SPACING = {

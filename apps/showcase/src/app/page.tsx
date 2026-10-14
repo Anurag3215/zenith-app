@@ -15,6 +15,7 @@ import {
   ShieldCheckIcon,
   StarIcon,
   ArrowRightIcon,
+  PlayIcon,
 } from '../components/Icons';
 
 export default function ShowcaseLandingPage() {
@@ -27,68 +28,78 @@ export default function ShowcaseLandingPage() {
     <div style={styles.page}>
       {/* Hero Section */}
       <section style={styles.hero}>
+        {/* Geometric Background Wireframe Circles from Reference Design */}
+        <div className="wireframe-circle-left" />
+        <div className="wireframe-circle-right" />
+
         <div className="container" style={styles.heroContainer}>
-          <div style={styles.heroBadgeRow}>
-            <div style={styles.heroBadge}>
-              <span style={styles.liveDot} className="pulse-dot" />
-              <span>TEAM NO. 5 • COHORT STANDING: RANK 2</span>
-            </div>
-            <div style={styles.verifiedTag}>
-              <ShieldCheckIcon size={14} color="#10B981" />
-              <span>Certified Placement Data</span>
-            </div>
+          {/* Top Pill Announcement Badge */}
+          <div className="hero-announcement-badge" style={{ marginBottom: '28px' }}>
+            <span
+              className="pulse-dot"
+              style={{
+                width: '7px',
+                height: '7px',
+                borderRadius: '50%',
+                backgroundColor: '#EC4899',
+                display: 'inline-block',
+                boxShadow: '0 0 8px #EC4899',
+              }}
+            />
+            <span>✦ TEAM NO. 5 • COHORT STANDING: RANK 2 • 465 PTS</span>
           </div>
 
+          {/* Hero Main Heading */}
           <h1 style={styles.heroTitle}>
-            Engineering Excellence, Rigorous Preparation & <span className="gradient-text-cyan">Placement Leadership</span>
+            Engineering Excellence &amp;<br />
+            Placement Cohort Leadership
           </h1>
 
+          {/* Hero Subtitle */}
           <p style={styles.heroDesc}>
-            Welcome to the official public presentation portal for <strong style={{ color: '#F8FAFC' }}>ZENITH (Team 5)</strong> in the mPOWER Placement Training Program. Inspect verified curriculum delivery, our verified Rank 2 leaderboard standing, individual member competencies, and genuine experiential reflections.
+            Official Evaluator Showcase for <strong style={{ color: '#FFFFFF' }}>ZENITH (Team 5)</strong> in the mPOWER Placement Training Program. Certified 10-group leaderboard standing, Day 1 delivery, verified competencies, and genuine experiential reflections.
           </p>
 
+          {/* Action Buttons: Gradient Pill + Glass Capsule */}
           <div style={styles.ctaRow}>
-            <Link href="/present" style={styles.ctaPrimary}>
-              <PresentationIcon size={16} color="#FFFFFF" />
-              <span>ENTER PRESENTATION MODE</span>
+            <Link href="/present" className="pill-btn-gradient">
+              <span>Enter Presentation Mode</span>
+              <ArrowRightIcon size={16} color="#FFFFFF" />
             </Link>
-            <Link href="/report" style={styles.ctaSecondary}>
-              <DocumentIcon size={16} color="#94A3B8" />
-              <span>EXECUTIVE DOSSIER (PDF)</span>
-            </Link>
-            <Link href="/#scoreboard" style={styles.ctaOutline}>
-              <TrophyIcon size={16} color="#FBBF24" />
-              <span>LEADERBOARD STANDINGS</span>
+            <Link href="/report" className="pill-btn-glass">
+              <PlayIcon size={13} color="#C084FC" />
+              <span>Executive Dossier (PDF)</span>
             </Link>
           </div>
 
-          {/* Quick Metrics Floating Bar */}
-          <div style={styles.quickBar} className="glass-panel">
-            <div style={styles.quickMetric}>
-              <div style={styles.quickValue} className="gradient-text-gold">#{zenithGroup?.rank || 2}</div>
-              <div style={styles.quickLabel}>COHORT RANK</div>
+          {/* 3 Metric Stat Cards (Matching Reference Layout) */}
+          <div style={styles.statsGrid}>
+            <div style={styles.statCard} className="glass-panel">
+              <div style={styles.statValue}>#{zenithGroup?.rank || 2}</div>
+              <div style={styles.statLabel}>Cohort Standing (of 10 Groups)</div>
             </div>
-            <div style={styles.quickDivider} />
-            <div style={styles.quickMetric}>
-              <div style={styles.quickValue} className="gradient-text-cyan">{zenithGroup?.current_points || 465}</div>
-              <div style={styles.quickLabel}>TOTAL POINTS</div>
+
+            <div style={styles.statCard} className="glass-panel">
+              <div style={styles.statValue}>{zenithGroup?.current_points || 465} <span style={styles.statUnit}>PTS</span></div>
+              <div style={styles.statLabel}>Total Points (Audit Verified)</div>
             </div>
-            <div style={styles.quickDivider} />
-            <div style={styles.quickMetric}>
-              <div style={styles.quickValue}>8</div>
-              <div style={styles.quickLabel}>CANDIDATES</div>
-            </div>
-            <div style={styles.quickDivider} />
-            <div style={styles.quickMetric}>
-              <div style={styles.quickValue}>1 <span style={{ fontSize: '14px', color: '#64748B' }}>/ 4</span></div>
-              <div style={styles.quickLabel}>DAYS COMPLETED</div>
+
+            <div style={styles.statCard} className="glass-panel">
+              <div style={styles.statValue}>8 / 8</div>
+              <div style={styles.statLabel}>Members • Day 1 Completed</div>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Luminous Neon Purple Horizon Beam (Directly above the Scoreboard / Dashboard) */}
+      <div className="horizon-glow-wrapper">
+        <div className="horizon-bloom" />
+        <div className="horizon-beam" />
+      </div>
+
       {/* Main Content Sections */}
-      <div className="container">
+      <div className="container" style={{ position: 'relative', zIndex: 3 }}>
         {/* Scoreboard Section */}
         <section id="scoreboard" style={styles.section}>
           <ScoreboardSnapshot
@@ -126,7 +137,7 @@ export default function ShowcaseLandingPage() {
         <section style={styles.closingSection} className="glass-panel">
           <div style={styles.closingHeader}>
             <div style={styles.closingPre}>TRAINING MASTERY</div>
-            <h2 style={styles.closingTitle}>Genuine Lessons & Future Placement Commitments</h2>
+            <h2 style={styles.closingTitle}>Genuine Lessons &amp; Future Placement Commitments</h2>
             <p style={styles.closingDesc}>Authentic experiential takeaways captured directly from team delivery.</p>
           </div>
 
@@ -140,13 +151,13 @@ export default function ShowcaseLandingPage() {
               </div>
               <ul style={styles.closingList}>
                 <li>
-                  <strong style={{ color: '#F8FAFC' }}>Speed Mathematics Discipline:</strong> Sectional aptitude under 60-second time boundaries requires systematic recognition of algebraic shortcuts rather than brute-force computation.
+                  <strong style={{ color: '#FFFFFF' }}>Speed Mathematics Discipline:</strong> Sectional aptitude under 60-second time boundaries requires systematic recognition of algebraic shortcuts rather than brute-force computation.
                 </li>
                 <li>
-                  <strong style={{ color: '#F8FAFC' }}>Quantified Resume Articulation:</strong> Evaluator panels prioritize measurable business impact and problem scale over generic keyword lists.
+                  <strong style={{ color: '#FFFFFF' }}>Quantified Resume Articulation:</strong> Evaluator panels prioritize measurable business impact and problem scale over generic keyword lists.
                 </li>
                 <li>
-                  <strong style={{ color: '#F8FAFC' }}>Operational Squad Synergy:</strong> Rapid consensus and structured turn-taking during group discussions generate higher cohort scores than aggressive dominance.
+                  <strong style={{ color: '#FFFFFF' }}>Operational Squad Synergy:</strong> Rapid consensus and structured turn-taking during group discussions generate higher cohort scores than aggressive dominance.
                 </li>
               </ul>
             </div>
@@ -154,19 +165,19 @@ export default function ShowcaseLandingPage() {
             <div style={styles.closingCard}>
               <div style={styles.closingCardHeader}>
                 <div style={styles.closingCardIcon}>
-                  <ShieldCheckIcon size={18} color="#00F0FF" />
+                  <ShieldCheckIcon size={18} color="#F472B6" />
                 </div>
                 <h3 style={styles.closingCardTitle}>Forward Commitments for Days 2–4</h3>
               </div>
               <ul style={styles.closingList}>
                 <li>
-                  <strong style={{ color: '#F8FAFC' }}>Technical Rigor:</strong> Execute algorithmic coding rounds with strict attention to time and space complexity boundaries.
+                  <strong style={{ color: '#FFFFFF' }}>Technical Rigor:</strong> Execute algorithmic coding rounds with strict attention to time and space complexity boundaries.
                 </li>
                 <li>
-                  <strong style={{ color: '#F8FAFC' }}>Interview Confidence:</strong> Apply the STAR methodology in mock behavioral rounds with verified situational anecdotes.
+                  <strong style={{ color: '#FFFFFF' }}>Interview Confidence:</strong> Apply the STAR methodology in mock behavioral rounds with verified situational anecdotes.
                 </li>
                 <li>
-                  <strong style={{ color: '#F8FAFC' }}>Podium Finish:</strong> Sustain Team 5&apos;s top-tier standing on the mPOWER competition leaderboard through rigorous peer coaching.
+                  <strong style={{ color: '#FFFFFF' }}>Podium Finish:</strong> Sustain Team 5&apos;s top-tier standing on the mPOWER competition leaderboard through rigorous peer coaching.
                 </li>
               </ul>
             </div>
@@ -181,163 +192,81 @@ const styles: Record<string, React.CSSProperties> = {
   page: {
     minHeight: '100vh',
     paddingBottom: '80px',
+    position: 'relative',
+    overflow: 'hidden',
   },
   hero: {
-    padding: '80px 0 60px',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-    marginBottom: '48px',
+    position: 'relative',
+    padding: '70px 0 30px',
   },
   heroContainer: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     textAlign: 'center',
-  },
-  heroBadgeRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    marginBottom: '24px',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-  },
-  heroBadge: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    backgroundColor: 'rgba(245, 158, 11, 0.12)',
-    border: '1px solid rgba(245, 158, 11, 0.35)',
-    color: '#FBBF24',
-    borderRadius: '24px',
-    padding: '6px 14px',
-    fontSize: '11px',
-    fontWeight: '800',
-    letterSpacing: '0.8px',
-    fontFamily: 'var(--font-mono)',
-  },
-  liveDot: {
-    width: '7px',
-    height: '7px',
-    borderRadius: '50%',
-    backgroundColor: '#FBBF24',
-    boxShadow: '0 0 8px #FBBF24',
-  },
-  verifiedTag: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    border: '1px solid rgba(16, 185, 129, 0.35)',
-    color: '#10B981',
-    borderRadius: '24px',
-    padding: '6px 14px',
-    fontSize: '11px',
-    fontWeight: '700',
-    fontFamily: 'var(--font-mono)',
+    position: 'relative',
+    zIndex: 2,
   },
   heroTitle: {
-    color: '#F8FAFC',
-    fontSize: 'clamp(32px, 5.5vw, 54px)',
+    color: '#FFFFFF',
+    fontSize: 'clamp(36px, 6vw, 62px)',
     fontWeight: '800',
-    lineHeight: 1.15,
-    maxWidth: '960px',
+    lineHeight: 1.14,
+    maxWidth: '920px',
     marginBottom: '20px',
-    letterSpacing: '-1px',
+    letterSpacing: '-1.5px',
+    textShadow: '0 2px 20px rgba(0, 0, 0, 0.4)',
   },
   heroDesc: {
-    color: '#94A3B8',
+    color: '#A5A6C4',
     fontSize: 'clamp(15px, 2vw, 17px)',
-    lineHeight: 1.7,
-    maxWidth: '820px',
-    marginBottom: '36px',
+    lineHeight: 1.65,
+    maxWidth: '720px',
+    marginBottom: '34px',
+    fontWeight: '400',
   },
   ctaRow: {
     display: 'flex',
-    gap: '14px',
+    gap: '16px',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    marginBottom: '48px',
+    marginBottom: '46px',
   },
-  ctaPrimary: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    background: 'linear-gradient(135deg, #2563EB 0%, #06B6D4 100%)',
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: '13px',
-    padding: '14px 26px',
-    borderRadius: '12px',
-    boxShadow: '0 6px 24px rgba(37, 99, 235, 0.4)',
-    letterSpacing: '0.5px',
-    transition: 'all 0.2s ease',
+  statsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+    gap: '20px',
+    width: '100%',
+    maxWidth: '880px',
   },
-  ctaSecondary: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    backgroundColor: 'rgba(30, 41, 59, 0.7)',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
-    color: '#F8FAFC',
-    fontWeight: '700',
-    fontSize: '13px',
-    padding: '14px 24px',
-    borderRadius: '12px',
-    letterSpacing: '0.5px',
-    transition: 'all 0.2s ease',
-  },
-  ctaOutline: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    backgroundColor: 'transparent',
-    border: '1px solid rgba(245, 158, 11, 0.4)',
-    color: '#FBBF24',
-    fontWeight: '700',
-    fontSize: '13px',
-    padding: '14px 22px',
-    borderRadius: '12px',
-    letterSpacing: '0.5px',
-    transition: 'all 0.2s ease',
-  },
-  quickBar: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '36px',
-    padding: '20px 48px',
+  statCard: {
+    padding: '24px 20px',
+    textAlign: 'center',
     borderRadius: '20px',
-    flexWrap: 'wrap',
   },
-  quickMetric: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  quickValue: {
-    fontSize: '32px',
+  statValue: {
+    fontSize: '36px',
     fontWeight: '800',
+    color: '#FFFFFF',
     letterSpacing: '-1px',
     fontFamily: 'var(--font-mono)',
   },
-  quickLabel: {
-    color: '#64748B',
-    fontSize: '11px',
+  statUnit: {
+    fontSize: '18px',
+    color: '#F472B6',
     fontWeight: '700',
-    letterSpacing: '1px',
-    marginTop: '4px',
-    fontFamily: 'var(--font-mono)',
   },
-  quickDivider: {
-    width: '1px',
-    height: '36px',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  statLabel: {
+    color: '#A5A6C4',
+    fontSize: '13px',
+    marginTop: '6px',
+    fontWeight: '500',
   },
   section: {
-    margin: '48px 0',
+    margin: '40px 0',
   },
   closingSection: {
-    padding: '40px',
+    padding: '44px',
     borderRadius: '24px',
     margin: '64px 0 32px',
   },
@@ -346,7 +275,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '32px',
   },
   closingPre: {
-    color: '#00F0FF',
+    color: '#F472B6',
     fontSize: '11px',
     fontWeight: '800',
     letterSpacing: '1.2px',
@@ -354,13 +283,13 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '6px',
   },
   closingTitle: {
-    color: '#F8FAFC',
+    color: '#FFFFFF',
     fontSize: '26px',
     fontWeight: '800',
     letterSpacing: '-0.5px',
   },
   closingDesc: {
-    color: '#94A3B8',
+    color: '#A5A6C4',
     fontSize: '14px',
     marginTop: '6px',
   },
@@ -370,9 +299,9 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '24px',
   },
   closingCard: {
-    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    backgroundColor: 'rgba(24, 14, 56, 0.6)',
     borderRadius: '16px',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
+    border: '1px solid rgba(168, 85, 247, 0.2)',
     padding: '28px',
   },
   closingCardHeader: {
@@ -385,13 +314,14 @@ const styles: Record<string, React.CSSProperties> = {
     width: '38px',
     height: '38px',
     borderRadius: '10px',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(168, 85, 247, 0.15)',
+    border: '1px solid rgba(168, 85, 247, 0.3)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
   },
   closingCardTitle: {
-    color: '#F8FAFC',
+    color: '#FFFFFF',
     fontSize: '17px',
     fontWeight: '700',
   },
@@ -400,7 +330,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     gap: '14px',
-    color: '#94A3B8',
+    color: '#A5A6C4',
     fontSize: '13px',
     lineHeight: 1.6,
   },
